@@ -8,9 +8,9 @@ import { router } from "@/routes";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
       retry: 1,
-      staleTime: 30000,
+      staleTime: 5000,
     },
   },
 });
@@ -21,15 +21,22 @@ export const App: React.FC = () => {
       <AuthProvider>
         <RouterProvider router={router} />
         <Toaster
-          position="bottom-right"
+          position="top-center"
           theme="dark"
           richColors
           toastOptions={{
             style: {
-              background: "rgba(14, 18, 25, 0.95)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              color: "#e2e8f0",
-              backdropFilter: "blur(12px)",
+              background: "rgba(13, 17, 24, 0.94)",
+              border: "1px solid rgba(0, 255, 200, 0.3)",
+              color: "#f8fafc",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              boxShadow: "0 20px 40px -6px rgba(0, 0, 0, 0.8), 0 0 25px -4px rgba(0, 255, 200, 0.25)",
+              borderRadius: "14px",
+              padding: "14px 20px",
+              fontSize: "14px",
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)",
             },
           }}
         />

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CreditCard, Wallet, ArrowRight } from "lucide-react";
+import { CreditCard, Wallet, ArrowRight, AlertCircle } from "lucide-react";
 import { api } from "@/api/client";
 import { PaymentProvider } from "@/api/types";
 import { useBranding } from "@/hooks/use-branding";
@@ -19,29 +19,25 @@ interface TopUpModalProps {
 const PRESETS = [300, 500, 1000, 2500, 5000];
 
 export const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
-  const { data: branding } = useBranding();
+  const { branding } = useBranding();
   const [amount, setAmount] = useState<string>("500");
   const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: providers = [] } = useQuery({
+  // Fetch real payment providers from backend
+  const { data: providers = [], isLoading } = useQuery({
     queryKey: ["payment-providers"],
     queryFn: async () => {
       try {
         return await api.get<PaymentProvider[]>("/user/purchases/providers");
       } catch {
-        return [
-          { id: 1, name: "Банковские карты (РФ)", currency: "RUB" },
-          { id: 2, name: "СБП (Система быстрых платежей)", currency: "RUB" },
-          { id: 3, name: "Криптовалюта (USDT / TON)", currency: "USDT" },
-        ] as PaymentProvider[];
+        return [];
       }
     },
     enabled: isOpen,
   });
 
-  // Auto-select first provider when loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (providers.length > 0 && !selectedProvider) {
       setSelectedProvider(providers[0].name);
     }
@@ -56,23 +52,32 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
+    if (!selectedProvider) {
+      toast.error("Выберите способ оплаты");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      const res = await api.post<{ pay_url?: string; payment_id?: number }>("/user/purchases/create", {
-        amount: numAmount,
-        provider: selectedProvider,
-        target: "balance",
-      });
+      const res = await api.post<{ payment_url?: string; pay_url?: string; id?: number }>(
+        "/user/purchases/create",
+        {
+          amount: numAmount,
+          provider: selectedProvider,
+          target: "balance",
+        }
+      );
 
-      if (res.pay_url) {
+      const url = res.payment_url || res.pay_url;
+      if (url) {
         toast.success("Перенаправление на страницу оплаты...");
-        window.location.href = res.pay_url;
+        window.location.href = url;
       } else {
         toast.success("Счет на оплату сформирован");
         onClose();
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Не удалось создать счет на оплату";
+      const msg = err instanceof Error ? err.message : "Не удалось сформировать счет";
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -96,6 +101,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
             variant="primary"
             onClick={handleSubmit}
             isLoading={isSubmitting}
+            disabled={providers.length === 0}
             rightIcon={<ArrowRight size={16} />}
           >
             Оплатить {numAmount > 0 ? `${numAmount.toLocaleString()} ${currency}` : ""}
@@ -131,33 +137,58 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
 
         <div className={styles.section}>
           <label className={styles.label}>Способ оплаты</label>
-          <div className={styles.providersList}>
-            {providers.map((p) => {
-              const isSelected = selectedProvider === p.name;
-              return (
-                <div
-                  key={p.id || p.name}
-                  className={`${styles.providerCard} ${isSelected ? styles.selected : ""}`}
-                  onClick={() => setSelectedProvider(p.name)}
-                >
-                  <div className={styles.icon}>
-                    {p.icon_url ? (
-                      <img src={p.icon_url} alt={p.name} />
-                    ) : (
-                      <CreditCard size={18} />
-                    )}
+          {isLoading ? (
+            <p style={{ fontSize: "0.875rem", color: "var(--color-text-dim)" }}>
+              Загрузка доступных провайдеров...
+            </p>
+          ) : providers.length > 0 ? (
+            <div className={styles.providersList}>
+              {providers.map((p) => {
+                const isSelected = selectedProvider === p.name;
+                return (
+                  <div
+                    key={p.id || p.name}
+                    className={`${styles.providerCard} ${isSelected ? styles.selected : ""}`}
+                    onClick={() => setSelectedProvider(p.name)}
+                  >
+                    <div className={styles.icon}>
+                      {p.icon_url ? (
+                        <img src={p.icon_url} alt={p.name} />
+                      ) : (
+                        <CreditCard size={18} />
+                      )}
+                    </div>
+                    <div className={styles.info}>
+                      <span className={styles.name}>{p.name}</span>
+                      <span className={styles.limits}>
+                        {p.currency} {p.min_amount ? `• от ${p.min_amount}` : ""}
+                      </span>
+                    </div>
+                    <div className={styles.radioDot} />
                   </div>
-                  <div className={styles.info}>
-                    <span className={styles.name}>{p.name}</span>
-                    <span className={styles.limits}>
-                      {p.currency} {p.min_amount ? `• от ${p.min_amount}` : ""}
-                    </span>
-                  </div>
-                  <div className={styles.radioDot} />
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                background: "rgba(245, 158, 11, 0.08)",
+                border: "1px solid rgba(245, 158, 11, 0.25)",
+                padding: "12px 16px",
+                borderRadius: "var(--radius-sm)",
+                color: "var(--color-warning)",
+                fontSize: "0.8125rem",
+              }}
+            >
+              <AlertCircle size={20} style={{ flexShrink: 0 }} />
+              <span>
+                Платежные методы временно не настроены администратором. Используйте промокод или обратитесь в службу поддержки.
+              </span>
+            </div>
+          )}
         </div>
 
         <div className={styles.summary}>

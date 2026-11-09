@@ -141,6 +141,20 @@
     font-weight: 700;
   }
 
+  .bonusChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #f59e0b;
+    border-radius: var(--radius-pill);
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
   .topupBtn {
     background: var(--color-accent);
     color: #05070a;

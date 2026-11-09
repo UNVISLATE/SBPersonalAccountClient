@@ -16,6 +16,8 @@ import {
   LogOut,
   Plus,
   Ticket,
+  Gift,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { QRCode } from "@unvislate/sbui-sdk";
@@ -65,6 +67,8 @@ export const ProfilePage: React.FC = () => {
   const [activeInstruction, setActiveInstruction] = useState<UserDigitalKey | null>(null);
 
   const currency = branding?.currency || "₽";
+  const mainBalance = Number(user?.balance ?? 0);
+  const bonusBalance = Number(user?.bonus_balance ?? 0);
 
   // Queries
   const { data: servicesData } = useQuery({
@@ -100,24 +104,29 @@ export const ProfilePage: React.FC = () => {
     },
   });
 
+  // Fetch active sessions using correct backend endpoint /user/me/sessions
   const { data: sessions = [] } = useQuery<AuthSession[]>({
     queryKey: ["user-sessions"],
     queryFn: async () => {
       try {
-        return await api.get<AuthSession[]>("/user/sessions");
+        return await api.get<AuthSession[]>("/user/me/sessions");
       } catch {
         return [];
       }
     },
   });
 
+  // Revoke session mutation
   const revokeSessionMutation = useMutation({
     mutationFn: async (sessionId: number) => {
-      await api.delete(`/user/sessions?session_id=${sessionId}`);
+      await api.delete(`/user/me/sessions/${sessionId}`);
     },
     onSuccess: () => {
       toast.success("Сессия успешно завершена");
       queryClient.invalidateQueries({ queryKey: ["user-sessions"] });
+    },
+    onError: () => {
+      toast.error("Не удалось завершить сессию");
     },
   });
 
@@ -212,11 +221,18 @@ export const ProfilePage: React.FC = () => {
             <div className={styles.balanceRow}>
               <span className={styles.balanceLabel}>Баланс:</span>
               <span className={styles.balanceVal}>
-                {(user?.balance ?? 0).toLocaleString("ru-RU", {
+                {mainBalance.toLocaleString("ru-RU", {
                   minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 })}{" "}
                 {currency}
               </span>
+              {bonusBalance > 0 && (
+                <span className={styles.bonusChip} title="Бонусный баланс">
+                  <Gift size={12} />
+                  +{bonusBalance.toLocaleString("ru-RU", { minimumFractionDigits: 2 })} бонус
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -231,20 +247,26 @@ export const ProfilePage: React.FC = () => {
             <span className={styles.statCount}>{keys.length}</span>
           </div>
           <div className={styles.statItem}>
-            <span className={styles.statTitle}>Транзакций</span>
-            <span className={styles.statCount}>{invoices.length}</span>
+            <span className={styles.statTitle}>Приглашено</span>
+            <span className={styles.statCount}>{user?.referral_count ?? 0}</span>
           </div>
-        </div>
 
-        <div className={styles.levelCard}>
-          <div className={styles.levelTop}>
-            <span className={styles.levelRank}>Уровень 1</span>
-            <span className={styles.levelDiscount}>Скидка 0%</span>
-          </div>
-          <div className={styles.progressWrapper}>
-            <div className={styles.progressBar} style={{ width: "20%" }} />
-          </div>
-          <span className={styles.levelHint}>Осталось потратить 1 000 ₽ до 5%</span>
+          {user?.ref_code && (
+            <div className={styles.refBox}>
+              <span className={styles.refLabel}>Реф. код</span>
+              <div className={styles.refCodeRow}>
+                <span className={styles.refCode}>{user.ref_code}</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => copy(`${window.location.origin}/register?ref=${user.ref_code}`, "ref_code")}
+                  title="Скопировать реферальную ссылку"
+                >
+                  {copiedKey === "ref_code" ? <Check size={14} color="var(--color-accent)" /> : <Share2 size={14} />}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -277,7 +299,7 @@ export const ProfilePage: React.FC = () => {
             onClick={() => setActiveTab("billing")}
           >
             <History size={16} />
-            <span>Транзакции</span>
+            <span>Транзакции ({invoices.length})</span>
           </button>
         </div>
 
@@ -356,29 +378,35 @@ export const ProfilePage: React.FC = () => {
               <h2 className={styles.panelTitle}>Активные сессии</h2>
             </div>
             <div className={styles.dataList}>
-              {sessions.map((s) => (
-                <div key={s.id} className={styles.dataRow}>
-                  <div className={styles.rowLeft}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <Laptop size={15} color="var(--color-accent)" />
-                      <span className={styles.rowVal}>{s.browser || s.user_agent || "Браузер"}</span>
-                      {s.is_current && <Badge variant="accent">Текущая</Badge>}
+              {sessions.length > 0 ? (
+                sessions.map((s) => (
+                  <div key={s.id} className={styles.dataRow}>
+                    <div className={styles.rowLeft}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Laptop size={15} color="var(--color-accent)" />
+                        <span className={styles.rowVal}>{s.browser || s.user_agent || "Браузер"}</span>
+                        {s.is_current && <Badge variant="accent">Текущая</Badge>}
+                      </div>
+                      <span className={styles.rowLabel}>
+                        IP: {s.ip} • Активность: {new Date(s.last_activity_at).toLocaleDateString("ru-RU")}
+                      </span>
                     </div>
-                    <span className={styles.rowLabel}>
-                      IP: {s.ip} • Активность: {new Date(s.last_activity_at).toLocaleDateString("ru-RU")}
-                    </span>
+                    {!s.is_current && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => revokeSessionMutation.mutate(s.id)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    )}
                   </div>
-                  {!s.is_current && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => revokeSessionMutation.mutate(s.id)}
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  )}
+                ))
+              ) : (
+                <div style={{ padding: "16px 0", color: "var(--color-text-dim)", fontSize: "0.875rem" }}>
+                  Активных сессий нет
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

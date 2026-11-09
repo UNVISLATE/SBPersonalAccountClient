@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Ticket, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/api/client";
@@ -15,6 +16,7 @@ interface PromoModalProps {
 
 export const PromoModal: React.FC<PromoModalProps> = ({ isOpen, onClose }) => {
   const { refreshUser } = useAuth();
+  const queryClient = useQueryClient();
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,12 +36,14 @@ export const PromoModal: React.FC<PromoModalProps> = ({ isOpen, onClose }) => {
       }>("/promocodes/redeem", { code: code.trim() });
 
       if (res.bonus_added) {
-        toast.success(`Промокод активирован! Начислено: +${res.bonus_added} ₽`);
+        toast.success(`Промокод активирован! Начислено: +${res.bonus_added} ₽ бонус`);
       } else {
         toast.success(res.message || "Промокод успешно активирован!");
       }
 
       await refreshUser();
+      queryClient.invalidateQueries({ queryKey: ["user-services"] });
+      queryClient.invalidateQueries({ queryKey: ["user-billing"] });
       setCode("");
       onClose();
     } catch (err: unknown) {
@@ -74,7 +78,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({ isOpen, onClose }) => {
     >
       <form onSubmit={handleSubmit} className={styles.form}>
         <p className={styles.hint}>
-          Введите подарочный промокод или купон для получения бонусов и активации услуг.
+          Введите промокод для начисления бонусов или активации услуги.
         </p>
         <Input
           value={code}

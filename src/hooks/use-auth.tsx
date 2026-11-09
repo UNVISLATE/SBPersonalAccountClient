@@ -11,7 +11,7 @@ interface AuthContextValue {
   register: (login: string, email: string, password: string) => Promise<void>
   claimGuestAccount: (code: string, password: string) => Promise<void>
   logout: () => Promise<void>
-  refreshUser: () => void
+  refreshUser: () => Promise<UserProfile | null>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     },
     retry: false,
-    staleTime: 60_000,
+    staleTime: 10_000,
   })
 
   useEffect(() => {
@@ -50,6 +50,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, onUnauthorized)
   }, [qc])
 
+  const refreshUser = async (): Promise<UserProfile | null> => {
+    try {
+      const profile = await api.get<UserProfile>("/user/me")
+      qc.setQueryData(["client-me"], profile)
+      return profile
+    } catch {
+      await refetch()
+      return null
+    }
+  }
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -57,18 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: Boolean(user),
       async login(login: string, password: string, totp?: string) {
         await api.post("/auth/login", { login, password, totp })
-        const profile = await api.get<UserProfile>("/user/me")
-        qc.setQueryData(["client-me"], profile)
+        await refreshUser()
       },
       async register(login: string, email: string, password: string) {
         await api.post("/auth/register", { login, email, password })
-        const profile = await api.get<UserProfile>("/user/me")
-        qc.setQueryData(["client-me"], profile)
+        await refreshUser()
       },
       async claimGuestAccount(claim_code: string, password: string) {
         await api.post("/auth/claim-guest-account/verify", { claim_code, password })
-        const profile = await api.get<UserProfile>("/user/me")
-        qc.setQueryData(["client-me"], profile)
+        await refreshUser()
       },
       async logout() {
         try {
@@ -79,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         qc.clear()
         window.location.href = "/login"
       },
-      refreshUser: () => void refetch(),
+      refreshUser,
     }),
     [user, isLoading, qc, refetch],
   )

@@ -8,30 +8,28 @@ import { CatalogService, PageResponse } from "@/api/types";
 import { useAuth } from "@/hooks/use-auth";
 import { useBranding } from "@/hooks/use-branding";
 import { Button } from "@/components/ui/Button/Button";
+import { Badge } from "@/components/ui/Badge/Badge";
 import { Modal } from "@/components/ui/Modal/Modal";
+import { ClientLayoutContext } from "@/components/layout/AppLayout";
 import styles from "./OrderCatalogPage.module.scss";
-
-interface LayoutContext {
-  openTopUp: () => void;
-}
 
 export const OrderCatalogPage: React.FC = () => {
   const { user, refreshUser } = useAuth();
-  const { data: branding } = useBranding();
-  const { openTopUp } = useOutletContext<LayoutContext>();
+  const { branding } = useBranding();
+  const { openTopUp } = useOutletContext<ClientLayoutContext>();
   const navigate = useNavigate();
 
-  const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedService, setSelectedService] = useState<CatalogService | null>(null);
   const [isOrdering, setIsOrdering] = useState(false);
 
   const currency = branding?.currency || "₽";
 
+  // Query real catalog services from /catalog/services
   const { data, isLoading } = useQuery({
     queryKey: ["catalog-services"],
     queryFn: async () => {
       try {
-        return await api.get<PageResponse<CatalogService>>("/catalog", { limit: 50 });
+        return await api.get<PageResponse<CatalogService>>("/catalog/services", { limit: 50 });
       } catch {
         return {
           items: [],
@@ -44,18 +42,14 @@ export const OrderCatalogPage: React.FC = () => {
     },
   });
 
-  const allItems = data?.items || [];
-  const categories = ["all", ...Array.from(new Set(allItems.map((s) => s.category).filter(Boolean)))];
-
-  const filteredItems = allItems.filter((s) => {
-    if (categoryFilter === "all") return true;
-    return s.category === categoryFilter;
-  });
+  const services = (data?.items || []).filter((s) => s.is_active);
 
   const handleOrderClick = (svc: CatalogService) => {
-    const cost = svc.base_price || 0;
-    if ((user?.balance ?? 0) < cost) {
-      toast.info(`Недостаточно средств. Пополните баланс на ${(cost - (user?.balance ?? 0)).toLocaleString()} ${currency}`);
+    const cost = parseFloat(svc.price) || 0;
+    const balance = Number(user?.balance ?? 0);
+
+    if (balance < cost) {
+      toast.info(`Недостаточно средств. Пополните баланс на ${(cost - balance).toLocaleString()} ${currency}`);
       openTopUp();
       return;
     }
@@ -71,10 +65,10 @@ export const OrderCatalogPage: React.FC = () => {
         service_id: selectedService.id,
       });
 
-      toast.success(`Услуга "${selectedService.name}" успешно подключена!`);
+      toast.success(`Услуга "${selectedService.name}" успешно оформлена!`);
       await refreshUser();
       setSelectedService(null);
-      navigate("/services");
+      navigate("/profile");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Не удалось оформить заказ";
       toast.error(msg);
@@ -94,51 +88,37 @@ export const OrderCatalogPage: React.FC = () => {
         </div>
       </div>
 
-      {categories.length > 1 && (
-        <div className={styles.filters}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              className={`${styles.filterBtn} ${categoryFilter === cat ? styles.active : ""}`}
-              onClick={() => setCategoryFilter(cat!)}
-            >
-              {cat === "all" ? "Все категории" : cat}
-            </button>
-          ))}
-        </div>
-      )}
-
       {isLoading ? (
         <div className={styles.empty}>
           <p>Загрузка каталога...</p>
         </div>
-      ) : filteredItems.length > 0 ? (
+      ) : services.length > 0 ? (
         <div className={styles.grid}>
-          {filteredItems.map((svc) => (
+          {services.map((svc) => (
             <div key={svc.id} className={styles.card}>
               <div className={styles.cardTop}>
                 <div className={styles.iconBox}>
-                  {svc.image_url ? (
-                    <img src={svc.image_url} alt={svc.name} />
-                  ) : (
-                    <Sparkles size={20} />
-                  )}
+                  <Sparkles size={20} />
                 </div>
                 <div className={styles.titles}>
                   <h3 className={styles.name}>{svc.name}</h3>
-                  <span className={styles.category}>{svc.category || "Сервис"}</span>
+                  <span className={styles.category}>
+                    {svc.delivery === "key" ? "Лицензионный ключ" : "Услуга"}
+                  </span>
                 </div>
+                {svc.out_of_stock && (
+                  <Badge variant="warning">Нет в наличии</Badge>
+                )}
               </div>
 
-              <p className={styles.desc}>
-                {svc.description || "Мгновенная выдача после подключения"}
-              </p>
+              {svc.description && (
+                <p className={styles.desc}>{svc.description}</p>
+              )}
 
               <div className={styles.pricingRow}>
                 <span className={styles.priceLabel}>Стоимость</span>
                 <span className={styles.priceVal}>
-                  {(svc.base_price ?? 0).toLocaleString("ru-RU")} {currency}
-                  {svc.pricing_model === "subscription" ? " / мес." : ""}
+                  {parseFloat(svc.price).toLocaleString("ru-RU")} {svc.currency || currency}
                 </span>
               </div>
 
@@ -146,9 +126,10 @@ export const OrderCatalogPage: React.FC = () => {
                 variant="primary"
                 size="md"
                 leftIcon={<Zap size={16} />}
+                disabled={svc.out_of_stock}
                 onClick={() => handleOrderClick(svc)}
               >
-                Подключить
+                {svc.out_of_stock ? "Распродано" : "Подключить"}
               </Button>
             </div>
           ))}
@@ -156,7 +137,7 @@ export const OrderCatalogPage: React.FC = () => {
       ) : (
         <div className={styles.empty}>
           <ShoppingBag size={44} opacity={0.3} />
-          <p>В выбранной категории нет услуг</p>
+          <p>В каталоге пока нет доступных товаров</p>
         </div>
       )}
 
@@ -182,18 +163,17 @@ export const OrderCatalogPage: React.FC = () => {
                 isLoading={isOrdering}
                 leftIcon={<Check size={16} />}
               >
-                Оплатить {(selectedService.base_price ?? 0).toLocaleString()} {currency}
+                Оплатить {parseFloat(selectedService.price).toLocaleString()} {currency}
               </Button>
             </>
           }
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <p style={{ fontSize: "0.875rem", color: "var(--color-text-muted)" }}>
-              Вы собираетесь подключить услугу{" "}
+              Списать с баланса и подключить:{" "}
               <strong style={{ color: "var(--color-text)" }}>
                 {selectedService.name}
               </strong>
-              .
             </p>
             <div
               style={{
@@ -207,7 +187,7 @@ export const OrderCatalogPage: React.FC = () => {
               }}
             >
               <span style={{ fontSize: "0.8125rem", color: "var(--color-text-dim)" }}>
-                Списание с баланса:
+                Стоимость:
               </span>
               <span
                 style={{
@@ -216,7 +196,7 @@ export const OrderCatalogPage: React.FC = () => {
                   color: "var(--color-accent)",
                 }}
               >
-                {(selectedService.base_price ?? 0).toLocaleString()} {currency}
+                {parseFloat(selectedService.price).toLocaleString()} {currency}
               </span>
             </div>
           </div>

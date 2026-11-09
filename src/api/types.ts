@@ -21,6 +21,9 @@ export interface UserProfile {
   created_at: string
   totp_enabled: boolean
   is_active: boolean
+  ref_code?: string | null
+  referred_by_login?: string | null
+  referral_count?: number
 }
 
 export type ServiceStatus = "active" | "expired" | "suspended" | "pending"
@@ -106,12 +109,16 @@ export interface StoreBranding {
 
 export interface CatalogService {
   id: number
+  slug?: string
   name: string
-  description?: string
-  category?: string
-  image_url?: string | null
-  pricing_model?: "fixed" | "subscription" | "custom" | "tiered"
-  base_price?: number
-  currency?: string
+  description?: string | null
+  catalog_id?: number | null
+  price: string
+  currency: string
+  price_type?: string
+  pricing_config?: Record<string, unknown>
+  delivery?: "key" | "auto" | "manual"
+  out_of_stock?: boolean
   is_active?: boolean
+  image_url?: string | null
 }
