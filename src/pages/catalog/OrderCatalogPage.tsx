@@ -34,45 +34,8 @@ export const OrderCatalogPage: React.FC = () => {
         return await api.get<PageResponse<CatalogService>>("/catalog", { limit: 50 });
       } catch {
         return {
-          items: [
-            {
-              id: 1,
-              name: "Ultra VPN / WireGuard",
-              category: "VPN & Прокси",
-              description: "Высокоскоростной защищенный VPN без логов с низким пингом и поддержкой роутеров.",
-              pricing_model: "subscription",
-              base_price: 299,
-              currency: "RUB",
-            },
-            {
-              id: 2,
-              name: "Shadowsocks / VLESS Proxy",
-              category: "VPN & Прокси",
-              description: "Обход блокировок с протоколами Reality/VLESS. Быстрая скорость 1 Gbps.",
-              pricing_model: "subscription",
-              base_price: 399,
-              currency: "RUB",
-            },
-            {
-              id: 3,
-              name: "CS2 / CS:GO External Lua Script",
-              category: "Скрипты",
-              description: "Набор продвинутых визуальных и игровых скриптов с приватной Ed25519 сборкой.",
-              pricing_model: "fixed",
-              base_price: 1490,
-              currency: "RUB",
-            },
-            {
-              id: 4,
-              name: "Dota 2 Auto-Combo Script Suite",
-              category: "Скрипты",
-              description: "Автоматический каст способностей и тайминги на всех метовых персонажей.",
-              pricing_model: "fixed",
-              base_price: 990,
-              currency: "RUB",
-            },
-          ] as CatalogService[],
-          total: 4,
+          items: [],
+          total: 0,
           limit: 50,
           offset: 0,
           has_more: false,

@@ -1,55 +1,94 @@
 .header {
-  height: 64px;
-  background: rgba(14, 18, 25, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  height: 72px;
+  background: rgba(10, 13, 18, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--color-glass-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 32px;
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 50;
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     padding: 0 16px;
-    height: 58px;
+    height: 64px;
   }
 }
 
 .left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 32px;
+}
 
-  .menuBtn {
-    display: none;
-    background: transparent;
-    border: none;
-    color: var(--color-text);
-    padding: 8px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
 
-    @media (max-width: 900px) {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
+  .logoImg {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 0 16px var(--color-accent-glow);
   }
 
-  .title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text);
+  .logoMark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #009080 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #05070a;
+    font-weight: 800;
+    box-shadow: 0 0 16px var(--color-accent-glow);
+  }
 
-    @media (max-width: 600px) {
-      display: none;
+  .brandName {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+  }
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+
+  .navLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+
+    &:hover {
+      color: var(--color-text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.active {
+      color: var(--color-accent);
+      background: var(--color-accent-subtle);
+      font-weight: 600;
     }
   }
 }
@@ -60,94 +99,98 @@
   gap: 12px;
 }
 
-.balanceGroup {
+.promoBtn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-glass-border);
+  color: var(--color-text);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  @media (max-width: 540px) {
+    display: none;
+  }
+}
+
+.balancePill {
   display: flex;
   align-items: center;
   gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-pill);
+  padding: 4px 6px 4px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
 
-  .balancePill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0, 255, 200, 0.04);
-    border: 1px solid rgba(0, 255, 200, 0.2);
-    border-radius: var(--radius-pill);
-    padding: 4px 12px 4px 14px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text);
-    transition: all var(--transition-fast);
-
-    .amount {
-      color: var(--color-accent);
-      font-family: var(--font-mono);
-      font-weight: 700;
-    }
-
-    .topupBtn {
-      background: var(--color-accent);
-      color: #05070a;
-      border: none;
-      border-radius: var(--radius-pill);
-      padding: 3px 8px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all var(--transition-fast);
-
-      &:hover {
-        background: #33ffda;
-        box-shadow: 0 0 10px var(--color-accent);
-        transform: translateY(-1px);
-      }
-    }
+  .amount {
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-weight: 700;
   }
 
-  .bonusPill {
+  .topupBtn {
+    background: var(--color-accent);
+    color: #05070a;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(255, 180, 0, 0.06);
-    border: 1px solid rgba(255, 180, 0, 0.25);
-    border-radius: var(--radius-pill);
-    padding: 4px 12px;
-    font-size: 0.8125rem;
-    color: var(--color-warning);
-    font-weight: 600;
+    gap: 4px;
+    transition: all var(--transition-fast);
 
-    .bonusAmount {
-      font-family: var(--font-mono);
-      font-weight: 700;
-    }
-
-    @media (max-width: 600px) {
-      display: none;
+    &:hover {
+      background: var(--color-accent-hover);
+      box-shadow: 0 0 12px var(--color-accent-glow);
     }
   }
 }
 
-.userMenu {
+.userPill {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-left: 8px;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px 4px 6px;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
 
   .avatar {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: var(--color-glass-card);
-    border: 1px solid var(--color-glass-border);
+    background: linear-gradient(135deg, rgba(0, 255, 200, 0.2), rgba(0, 144, 128, 0.4));
+    border: 1px solid rgba(0, 255, 200, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-text-muted);
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    color: var(--color-accent);
     overflow: hidden;
 
     img {
@@ -157,45 +200,27 @@
     }
   }
 
-  .userInfo {
-    display: flex;
-    flex-direction: column;
+  .login {
+    font-size: 0.875rem;
+    font-weight: 600;
 
-    @media (max-width: 768px) {
+    @media (max-width: 600px) {
       display: none;
-    }
-
-    .login {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--color-text);
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .role {
-      font-size: 0.7rem;
-      color: var(--color-text-dim);
     }
   }
 
   .logoutBtn {
-    background: transparent;
+    background: none;
     border: none;
     color: var(--color-text-dim);
-    padding: 6px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding: 2px;
+    cursor: pointer;
+    transition: color var(--transition-fast);
 
     &:hover {
       color: var(--color-danger);
-      background: rgba(255, 68, 68, 0.08);
     }
   }
 }

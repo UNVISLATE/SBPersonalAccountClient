@@ -92,12 +92,16 @@ export interface AuthSession {
 }
 
 export interface StoreBranding {
-  shop_name: string
+  name: string
+  shop_name?: string
   logo_url?: string | null
+  favicon_url?: string | null
   currency: string
-  currencies: string[]
+  currencies?: string[]
   support_link?: string | null
   description?: string | null
+  theme?: Record<string, unknown>
+  settings?: Record<string, unknown>
 }
 
 export interface CatalogService {

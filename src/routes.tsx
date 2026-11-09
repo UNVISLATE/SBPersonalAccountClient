@@ -4,13 +4,9 @@ import { GuestRoute } from "@/components/auth/GuestRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { RegisterPage } from "@/pages/auth/RegisterPage";
-import { DashboardPage } from "@/pages/dashboard/DashboardPage";
-import { ServicesPage } from "@/pages/services/ServicesPage";
+import { ProfilePage } from "@/pages/profile/ProfilePage";
 import { ServiceDetailPage } from "@/pages/services/ServiceDetailPage";
-import { KeysVaultPage } from "@/pages/keys/KeysVaultPage";
-import { BillingHistoryPage } from "@/pages/finance/BillingHistoryPage";
 import { OrderCatalogPage } from "@/pages/catalog/OrderCatalogPage";
-import { ProfileSettingsPage } from "@/pages/profile/ProfileSettingsPage";
 
 export const router = createBrowserRouter([
   // Guest-only routes
@@ -42,35 +38,35 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="/profile" replace />,
+      },
+      {
+        path: "profile",
+        element: <ProfilePage />,
       },
       {
         path: "dashboard",
-        element: <DashboardPage />,
-      },
-      {
-        path: "services",
-        element: <ServicesPage />,
-      },
-      {
-        path: "services/:id",
-        element: <ServiceDetailPage />,
-      },
-      {
-        path: "keys",
-        element: <KeysVaultPage />,
-      },
-      {
-        path: "finance",
-        element: <BillingHistoryPage />,
+        element: <Navigate to="/profile" replace />,
       },
       {
         path: "catalog",
         element: <OrderCatalogPage />,
       },
       {
-        path: "profile",
-        element: <ProfileSettingsPage />,
+        path: "services/:id",
+        element: <ServiceDetailPage />,
+      },
+      {
+        path: "services",
+        element: <Navigate to="/profile" replace />,
+      },
+      {
+        path: "keys",
+        element: <Navigate to="/profile" replace />,
+      },
+      {
+        path: "finance",
+        element: <Navigate to="/profile" replace />,
       },
     ],
   },
@@ -78,6 +74,6 @@ export const router = createBrowserRouter([
   // Fallback
   {
     path: "*",
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/profile" replace />,
   },
 ]);

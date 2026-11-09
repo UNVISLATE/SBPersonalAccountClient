@@ -43,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
           )}
           <div className={styles.brandInfo}>
-            <span className={styles.name}>{branding?.shop_name || "Личный кабинет"}</span>
+            <span className={styles.name}>{branding?.name || "Личный кабинет"}</span>
             <span className={styles.subtitle}>Client Portal</span>
           </div>
         </div>

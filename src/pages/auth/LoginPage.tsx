@@ -56,7 +56,7 @@ export const LoginPage: React.FC = () => {
             <Sparkles size={26} strokeWidth={2.5} />
           </div>
           <h1 className={styles.title}>
-            {branding?.shop_name || "Личный кабинет"}
+            {branding?.name || "Личный кабинет"}
           </h1>
           <p className={styles.subtitle}>
             Авторизуйтесь для доступа к сервисам и лицензионным ключам

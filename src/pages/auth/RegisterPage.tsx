@@ -59,7 +59,7 @@ export const RegisterPage: React.FC = () => {
           </div>
           <h1 className={styles.title}>Создание аккаунта</h1>
           <p className={styles.subtitle}>
-            Зарегистрируйтесь в {branding?.shop_name || "личном кабинете"}
+            Зарегистрируйтесь в {branding?.name || "личном кабинете"}
           </p>
         </div>
 

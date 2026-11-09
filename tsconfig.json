@@ -23,7 +23,9 @@
     /* Paths */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@unvislate/sbui-sdk": ["vendor/sbuiSDK/src/index.ts"],
+      "@unvislate/sbui-sdk/*": ["vendor/sbuiSDK/src/*"]
     }
   },
   "include": ["src"]

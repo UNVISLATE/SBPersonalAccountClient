@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@unvislate/sbui-sdk": path.resolve(__dirname, "./vendor/sbuiSDK/src"),
     },
   },
   css: {
