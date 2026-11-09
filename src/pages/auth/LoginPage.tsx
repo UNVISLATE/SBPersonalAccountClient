@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Lock, User, KeyRound, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { Lock, User, Sparkles, ArrowRight, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useBranding } from "@/hooks/use-branding";
@@ -9,37 +9,31 @@ import { Button } from "@/components/ui/Button/Button";
 import styles from "./LoginPage.module.scss";
 
 export const LoginPage: React.FC = () => {
-  const { login, claimGuestAccount } = useAuth();
+  const { login } = useAuth();
   const { data: branding } = useBranding();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [activeTab, setActiveTab] = useState<"password" | "claim">("password");
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Standard Login state
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [totpCode, setTotpCode] = useState("");
   const [needs2FA, setNeeds2FA] = useState(false);
-
-  // Claim Order state
-  const [claimToken, setClaimToken] = useState("");
-  const [claimEmail, setClaimEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/dashboard";
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier.trim() || !password) {
-      toast.error("Пожалуйста, заполните все поля");
+      toast.error("Заполните логин и пароль");
       return;
     }
 
     try {
       setIsLoading(true);
-      await login(identifier, password, totpCode || undefined);
-      toast.success("Успешный вход в личный кабинет");
+      await login(identifier.trim(), password, totpCode.trim() || undefined);
+      toast.success("Вход выполнен успешно");
       navigate(from, { replace: true });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Ошибка авторизации";
@@ -54,133 +48,75 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleClaimSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!claimToken.trim() || !claimEmail.trim()) {
-      toast.error("Укажите токен заказа и ваш email");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      await claimGuestAccount(claimToken.trim(), claimEmail.trim());
-      toast.success("Заказ успешно привязан! Добро пожаловать.");
-      navigate("/dashboard", { replace: true });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Не удалось привязать гостевой заказ";
-      toast.error(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className={styles.authContainer}>
       <div className={styles.authCard}>
         <div className={styles.header}>
           <div className={styles.logo}>
-            <Sparkles size={24} />
+            <Sparkles size={26} strokeWidth={2.5} />
           </div>
-          <h1 className={styles.title}>{branding?.shop_name || "Личный кабинет"}</h1>
+          <h1 className={styles.title}>
+            {branding?.shop_name || "Личный кабинет"}
+          </h1>
           <p className={styles.subtitle}>
-            Управление активными сервисами и лицензионными ключами
+            Авторизуйтесь для доступа к сервисам и лицензионным ключам
           </p>
         </div>
 
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === "password" ? styles.active : ""}`}
-            onClick={() => setActiveTab("password")}
-          >
-            Вход по паролю
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === "claim" ? styles.active : ""}`}
-            onClick={() => setActiveTab("claim")}
-          >
-            Гостевой заказ
-          </button>
-        </div>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <Input
+            label="Логин или Email"
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="Введите ваш логин или email"
+            leftIcon={<User size={18} />}
+            required
+            autoFocus
+          />
 
-        {activeTab === "password" ? (
-          <form onSubmit={handlePasswordSubmit} className={styles.form}>
+          <Input
+            label="Пароль"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            leftIcon={<Lock size={18} />}
+            rightIcon={
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            }
+            required
+          />
+
+          {needs2FA && (
             <Input
-              label="Логин или Email"
+              label="Код двухфакторной аутентификации (2FA)"
               type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="Введите логин или почту"
-              leftIcon={<User size={18} />}
-              required
+              value={totpCode}
+              onChange={(e) => setTotpCode(e.target.value)}
+              placeholder="000000"
+              leftIcon={<ShieldCheck size={18} />}
               autoFocus
             />
+          )}
 
-            <Input
-              label="Пароль"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              leftIcon={<Lock size={18} />}
-              required
-            />
-
-            {needs2FA && (
-              <Input
-                label="Код подтверждения (2FA Authenticator)"
-                type="text"
-                value={totpCode}
-                onChange={(e) => setTotpCode(e.target.value)}
-                placeholder="6-значный код"
-                leftIcon={<ShieldCheck size={18} />}
-                autoFocus
-              />
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              isLoading={isLoading}
-              rightIcon={<ArrowRight size={18} />}
-            >
-              Войти в аккаунт
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={handleClaimSubmit} className={styles.form}>
-            <Input
-              label="Токен или номер заказа"
-              type="text"
-              value={claimToken}
-              onChange={(e) => setClaimToken(e.target.value)}
-              placeholder="sb-claim-xxxx-xxxx"
-              leftIcon={<KeyRound size={18} />}
-              required
-              autoFocus
-            />
-
-            <Input
-              label="Email, указанный при покупке"
-              type="email"
-              value={claimEmail}
-              onChange={(e) => setClaimEmail(e.target.value)}
-              placeholder="user@example.com"
-              leftIcon={<User size={18} />}
-              required
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              isLoading={isLoading}
-              rightIcon={<ArrowRight size={18} />}
-            >
-              Привязать и открыть
-            </Button>
-          </form>
-        )}
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            isLoading={isLoading}
+            rightIcon={<ArrowRight size={18} />}
+          >
+            Войти в аккаунт
+          </Button>
+        </form>
 
         <div className={styles.footer}>
           Нет аккаунта?
