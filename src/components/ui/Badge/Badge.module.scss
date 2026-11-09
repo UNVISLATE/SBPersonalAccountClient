@@ -1,0 +1,102 @@
+@use "@/styles/variables" as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: $font-sans;
+  font-weight: 600;
+  border-radius: $radius-full;
+  user-select: none;
+  white-space: nowrap;
+  width: fit-content;
+  line-height: 1;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .icon {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+// Sizes
+.sm {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.md {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+// Variants
+.success {
+  background: $status-success-bg;
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+
+  .dot {
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+  }
+}
+
+.warning {
+  background: $status-warning-bg;
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+
+  .dot {
+    background: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+  }
+}
+
+.danger {
+  background: $status-danger-bg;
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+
+  .dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+  }
+}
+
+.info {
+  background: $status-info-bg;
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.25);
+
+  .dot {
+    background: #0ea5e9;
+    box-shadow: 0 0 8px #0ea5e9;
+  }
+}
+
+.accent {
+  background: $accent-primary-muted;
+  color: $accent-primary;
+  border: 1px solid rgba(0, 255, 200, 0.3);
+
+  .dot {
+    background: $accent-primary;
+    box-shadow: 0 0 8px $accent-primary;
+  }
+}
+
+.neutral {
+  background: rgba(255, 255, 255, 0.05);
+  color: $text-secondary;
+  border: 1px solid $border-glass;
+
+  .dot {
+    background: $text-muted;
+  }
+}

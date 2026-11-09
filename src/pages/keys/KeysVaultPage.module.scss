@@ -1,0 +1,132 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text);
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+  }
+}
+
+.searchBar {
+  max-width: 400px;
+}
+
+.keysGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.keyCard {
+  background: rgba(14, 18, 25, 0.7);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-md);
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  transition: all var(--transition-fast);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(14, 18, 25, 0.85);
+  }
+
+  .leftSide {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .nameRow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .productName {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--color-text);
+      }
+    }
+
+    .date {
+      font-size: 0.75rem;
+      color: var(--color-text-dim);
+    }
+  }
+
+  .rightSide {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .keyDisplay {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--color-accent);
+      min-width: 220px;
+      justify-content: space-between;
+    }
+  }
+}
+
+.instructionContent {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  background: rgba(14, 18, 25, 0.4);
+  border: 1px dashed var(--color-glass-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: var(--color-text-dim);
+}

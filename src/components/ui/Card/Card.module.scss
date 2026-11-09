@@ -1,0 +1,92 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.card {
+  @include glass-panel($bg: $bg-surface-glass-card, $border: $border-glass, $blur: 16px);
+  border-radius: $radius-lg;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.02) 60%,
+      transparent
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+.interactive {
+  cursor: pointer;
+  transition: all $transition-smooth;
+
+  &:hover {
+    border-color: $border-glass-hover;
+    background: rgba(22, 28, 39, 0.75);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 24px -6px rgba(0, 255, 200, 0.15);
+  }
+}
+
+.glow {
+  box-shadow: 0 0 35px -8px rgba(0, 255, 200, 0.15), $shadow-glow-card;
+}
+
+.header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 16px;
+
+  .titles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: $text-primary;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: $text-secondary;
+    }
+  }
+
+  .action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.body {
+  padding: 20px 24px;
+  flex: 1;
+}
+
+.footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

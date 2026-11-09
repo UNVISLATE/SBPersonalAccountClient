@@ -1,0 +1,97 @@
+@use "@/styles/variables" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
+}
+
+.inputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: $bg-input;
+  border: 1px solid $border-glass;
+  border-radius: $radius-md;
+  transition: all $transition-smooth;
+
+  &:focus-within {
+    border-color: $border-accent;
+    background: rgba(14, 18, 25, 0.95);
+    box-shadow: 0 0 16px -2px rgba(0, 255, 200, 0.2);
+  }
+
+  &.hasError {
+    border-color: rgba(239, 68, 68, 0.5);
+
+    &:focus-within {
+      box-shadow: 0 0 16px -2px rgba(239, 68, 68, 0.25);
+    }
+  }
+}
+
+.input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: $text-primary;
+  background: transparent;
+
+  &::placeholder {
+    color: $text-dim;
+  }
+
+  &.paddedLeft {
+    padding-left: 38px;
+  }
+
+  &.paddedRight {
+    padding-right: 38px;
+  }
+}
+
+.iconLeft {
+  position: absolute;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  color: $text-muted;
+  pointer-events: none;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.iconRight {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  color: $text-muted;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.errorText {
+  font-size: 12px;
+  color: #f87171;
+}
+
+.helperText {
+  font-size: 12px;
+  color: $text-dim;
+}
