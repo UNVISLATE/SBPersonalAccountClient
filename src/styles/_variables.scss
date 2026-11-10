@@ -1,75 +1,54 @@
-// ==========================================
-// COLOR PALETTE (Dark Glassmorphic & Modern Glow)
-// ==========================================
+// Base Dark Palette (matched to SaviorBill AdminUI neutral obsidian + teal accent)
+$bg-primary: #0a0a0b;
+$bg-secondary: #121214;
+$bg-card: rgba(23, 23, 25, 0.88);
+$bg-card-hover: rgba(34, 34, 37, 0.94);
+$bg-card-subtle: rgba(18, 18, 20, 0.74);
+$bg-input: rgba(16, 16, 18, 0.82);
 
-// Base Backgrounds
-$bg-app: #080a0f;
-$bg-surface: #0e1219;
-$bg-surface-elevated: #141a24;
-$bg-surface-glass: rgba(14, 18, 25, 0.75);
-$bg-surface-glass-card: rgba(20, 26, 36, 0.65);
-$bg-surface-hover: rgba(255, 255, 255, 0.04);
-$bg-input: rgba(10, 13, 18, 0.7);
+// Default Accent Colors (AdminUI teal #009080 / #0C5E53; dynamically overridden by useBranding -> CSS vars)
+$accent-default: #009080;
+$accent-hover: #00a896;
+$accent-deep: #0c5e53;
+$accent-subtle: rgba(0, 144, 128, 0.14);
+$accent-glow: rgba(0, 144, 128, 0.34);
 
-// Neon & Brand Accents
-$accent-primary: #00ffc8;
-$accent-primary-hover: #1affd1;
-$accent-primary-muted: rgba(0, 255, 200, 0.12);
-$accent-primary-glow: rgba(0, 255, 200, 0.25);
+// Functional Colors
+$color-success: #10b981;
+$color-warning: #f59e0b;
+$color-danger: #ef4444;
+$color-info: #3b82f6;
 
-$accent-secondary: #009080;
-$accent-secondary-glow: rgba(0, 144, 128, 0.3);
-
-$accent-violet: #8b5cf6;
-$accent-violet-glow: rgba(139, 92, 246, 0.25);
-
-// Semantic Status Colors
-$status-success: #10b981;
-$status-success-bg: rgba(16, 185, 129, 0.12);
-$status-success-glow: rgba(16, 185, 129, 0.3);
-
-$status-warning: #f59e0b;
-$status-warning-bg: rgba(245, 158, 11, 0.12);
-$status-warning-glow: rgba(245, 158, 11, 0.3);
-
-$status-danger: #ef4444;
-$status-danger-bg: rgba(239, 68, 68, 0.12);
-$status-danger-glow: rgba(239, 68, 68, 0.3);
-
-$status-info: #0ea5e9;
-$status-info-bg: rgba(14, 165, 233, 0.12);
-$status-info-glow: rgba(14, 165, 233, 0.3);
+// Text Colors (neutral zinc hierarchy matching AdminUI dark)
+$text-primary: #fafafa;
+$text-secondary: #a1a1aa;
+$text-muted: #71717a;
+$text-dim: #52525b;
 
 // Borders
+$border-glass: rgba(255, 255, 255, 0.1);
+$border-glass-hover: rgba(255, 255, 255, 0.18);
 $border-subtle: rgba(255, 255, 255, 0.06);
-$border-glass: rgba(255, 255, 255, 0.09);
-$border-glass-hover: rgba(255, 255, 255, 0.16);
-$border-accent: rgba(0, 255, 200, 0.35);
 
-// Typography
-$font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-$font-mono: 'JetBrains Mono', monospace;
-
-$text-primary: #f8fafc;
-$text-secondary: #94a3b8;
-$text-muted: #64748b;
-$text-dim: #475569;
-
-// Radiuses
-$radius-sm: 6px;
-$radius-md: 10px;
-$radius-lg: 14px;
-$radius-xl: 20px;
+// Radii
+$radius-xs: 6px;
+$radius-sm: 10px;
+$radius-md: 14px;
+$radius-lg: 20px;
+$radius-xl: 24px;
 $radius-full: 9999px;
 
-// Shadows & Glows
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-$shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.5);
-$shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
-$shadow-glow-primary: 0 0 25px -4px rgba(0, 255, 200, 0.35);
-$shadow-glow-card: 0 0 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+// Easing & Transitions
+$ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+$transition-fast: 0.16s #{$ease-smooth};
+$transition-normal: 0.24s #{$ease-out-expo};
+$transition-slow: 0.45s #{$ease-out-expo};
 
-// Transitions
-$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-$transition-smooth: 250ms cubic-bezier(0.16, 1, 0.3, 1);
-$transition-bounce: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+// Z-index layers
+$z-base: 1;
+$z-header: 40;
+$z-dropdown: 60;
+$z-modal: 100;
+$z-lightbox: 120;
+$z-toast: 150;

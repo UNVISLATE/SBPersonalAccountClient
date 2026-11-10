@@ -1,0 +1,253 @@
+@use "./variables" as *;
+@use "./mixins" as *;
+
+// ============================================================================
+// External overrides for @unvislate/sbui-sdk (without modifying submodule)
+// ============================================================================
+
+:root {
+  --sbui-primary: var(--color-accent, #{$accent-default});
+  --sbui-primary-hover: var(--color-accent-hover, #{$accent-hover});
+  --sbui-primary-fg: #ffffff;
+  --sbui-accent: var(--color-accent-hover, #{$accent-hover});
+
+  --sbui-bg: var(--color-bg, #{$bg-primary});
+  --sbui-card-bg: var(--color-input, #{$bg-input});
+  --sbui-surface-elevated: rgba(24, 24, 27, 0.96);
+  --sbui-surface-hover: rgba(255, 255, 255, 0.06);
+
+  --sbui-border: #{$border-glass};
+  --sbui-border-focus: var(--color-accent, #{$accent-default});
+
+  --sbui-fg: var(--color-text, #{$text-primary});
+  --sbui-fg-muted: var(--color-text-secondary, #{$text-secondary});
+  --sbui-fg-subtle: var(--color-text-muted, #{$text-muted});
+  --sbui-font-family: var(--font-sans);
+  --sbui-font-mono: var(--font-mono);
+
+  --sbui-radius-sm: #{$radius-xs};
+  --sbui-radius-md: #{$radius-md};
+  --sbui-radius-lg: #{$radius-lg};
+  --sbui-radius-xl: #{$radius-xl};
+
+  --sbui-dp-bg: rgba(22, 22, 25, 0.98);
+  --sbui-dp-border: #{$border-glass};
+  --sbui-dp-selected-bg: var(--color-accent, #{$accent-default});
+  --sbui-dp-hover-bg: rgba(255, 255, 255, 0.06);
+  --sbui-dp-today-border: var(--color-accent, #{$accent-default});
+}
+
+// External styling overrides inside SDUI form scope
+.sbui-form-scope {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+
+  .sbui-input-group,
+  .sbui-select-wrapper {
+    width: 100%;
+
+    label {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary) !important;
+      margin-bottom: 6px !important;
+    }
+
+    input {
+      height: 44px;
+      padding: 0 14px !important;
+      font-size: 14px !important;
+      font-family: var(--font-sans) !important;
+      background: var(--color-input) !important;
+      border: 1px solid $border-glass !important;
+      border-radius: $radius-md !important;
+      color: var(--color-text) !important;
+      transition: border-color $transition-fast, box-shadow $transition-fast !important;
+
+      &:focus {
+        border-color: var(--color-accent) !important;
+        box-shadow: 0 0 0 3px var(--color-accent-subtle) !important;
+      }
+
+      &::placeholder {
+        color: var(--color-text-dim);
+      }
+    }
+  }
+
+  .sbui-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    background: var(--color-input);
+    border: 1px solid $border-glass;
+    border-radius: $radius-md;
+    color: var(--color-text);
+    font-size: 14px;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast, box-shadow $transition-fast;
+
+    &:hover {
+      border-color: $border-glass-hover;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    &.is-open {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-subtle);
+    }
+  }
+
+  .sbui-select-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+
+  .sbui-select-chevron {
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    transition: transform $transition-fast;
+
+    &.is-open {
+      transform: rotate(180deg);
+    }
+  }
+
+  .sbui-select-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: $z-dropdown;
+    background: rgba(22, 22, 25, 0.98);
+    border: 1px solid $border-glass;
+    border-radius: $radius-md;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+    padding: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    backdrop-filter: blur(14px);
+    @include scrollbar-sleek;
+  }
+
+  .sbui-select-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: $radius-sm;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--color-text);
+    }
+
+    &.is-selected {
+      background: var(--color-accent-subtle);
+      color: #ffffff;
+      font-weight: 600;
+    }
+  }
+
+  .sbui-option-check {
+    color: var(--color-accent-hover);
+    font-weight: 700;
+  }
+
+  .sbui-toggle-group {
+    padding: 12px 14px;
+    border-radius: $radius-md;
+    background: rgba(16, 16, 18, 0.55);
+    border: 1px solid $border-subtle;
+  }
+
+  .sbui-alert {
+    background: var(--color-accent-subtle) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: $radius-md !important;
+    color: var(--color-text-secondary) !important;
+  }
+}
+
+.sbui-view-scope {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+
+  .sbui-card {
+    background: rgba(16, 16, 18, 0.62) !important;
+    border: 1px solid $border-glass !important;
+    border-radius: $radius-lg !important;
+    padding: 16px !important;
+    width: 100%;
+
+    .sbui-card-header {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text);
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid $border-subtle;
+    }
+  }
+
+  .sbui-column,
+  .sbui-row {
+    width: 100%;
+  }
+
+  .sbui-row {
+    @include mobile {
+      flex-wrap: wrap;
+    }
+  }
+
+  .sbui-grid {
+    @include mobile {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+  }
+
+  .sbui-divider {
+    background: $border-subtle !important;
+  }
+
+  .sbui-alert {
+    background: var(--color-accent-subtle) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: $radius-md !important;
+    color: var(--color-text-secondary) !important;
+  }
+
+  .sbui-qr-container {
+    max-width: 100%;
+
+    .sbui-qr-plate {
+      padding: 14px;
+      border-radius: 22px;
+      max-width: min(260px, 72vw);
+      max-height: min(260px, 72vw);
+      box-shadow:
+        0 14px 36px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+  }
+}

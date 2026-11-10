@@ -1,59 +1,39 @@
-// ==========================================
-// SCSS MIXINS (Glassmorphism, Flex, Gradients)
-// ==========================================
+@use "./variables" as *;
 
-@use "sass:color";
-@use "variables" as *;
+// Responsive breakpoints
+$bp-mobile: 767px;
+$bp-tablet: 1023px;
+$bp-desktop: 1280px;
 
-@mixin glass-panel($bg: $bg-surface-glass, $border: $border-glass, $blur: 16px) {
+@mixin mobile {
+  @media (max-width: #{$bp-mobile}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: #{$bp-tablet}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: #{$bp-tablet + 1px}) {
+    @content;
+  }
+}
+
+@mixin glass-panel($bg: var(--color-card), $border: var(--color-border)) {
   background: $bg;
-  backdrop-filter: blur($blur);
-  -webkit-backdrop-filter: blur($blur);
   border: 1px solid $border;
-  box-shadow: $shadow-glow-card;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
-@mixin glass-card-interactive {
-  @include glass-panel($bg: $bg-surface-glass-card, $border: $border-glass, $blur: 14px);
-  border-radius: $radius-lg;
-  transition: all $transition-smooth;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.12),
-      rgba(255, 255, 255, 0.02) 60%,
-      transparent
-    );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    transition: opacity $transition-smooth;
-    opacity: 0.7;
-  }
-
-  &:hover {
-    border-color: $border-glass-hover;
-    background: rgba(24, 30, 42, 0.75);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.7), 0 0 20px -8px rgba(0, 255, 200, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
-  }
-}
-
-@mixin glow-accent($color: $accent-primary, $intensity: 0.35) {
-  box-shadow: 0 0 24px -2px rgba($color, $intensity);
+@mixin capsule-surface($bg: var(--color-surface-subtle), $border: var(--color-border)) {
+  background: $bg;
+  border: 1px solid $border;
+  border-radius: $radius-full;
 }
 
 @mixin flex-center {
@@ -68,30 +48,33 @@
   justify-content: space-between;
 }
 
-@mixin custom-scrollbar($width: 6px) {
-  &::-webkit-scrollbar {
-    width: $width;
-    height: $width;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: $radius-full;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: $radius-full;
-    transition: background $transition-fast;
-
-    &:hover {
-      background: rgba(0, 255, 200, 0.4);
-    }
-  }
-}
-
 @mixin truncate {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@mixin hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@mixin scrollbar-sleek {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    &:hover {
+      background: rgba(255, 255, 255, 0.24);
+    }
+  }
 }
