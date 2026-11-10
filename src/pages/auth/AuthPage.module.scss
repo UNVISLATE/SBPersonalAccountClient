@@ -1,0 +1,303 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--color-bg, #{$bg-primary});
+  position: relative;
+  overflow: hidden;
+}
+
+.ambientGlow {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 720px;
+  height: 420px;
+  background: radial-gradient(
+    ellipse at center,
+    var(--color-accent-subtle, rgba(0, 144, 128, 0.16)) 0%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.authContainer {
+  width: 100%;
+  max-width: 900px;
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: 0.95fr 1.15fr;
+  @include glass-panel;
+  border-radius: $radius-xl;
+  box-shadow:
+    0 32px 90px -12px rgba(0, 0, 0, 0.85),
+    0 0 60px -15px var(--color-accent-subtle, rgba(0, 144, 128, 0.2));
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    min-height: auto;
+    border-radius: $radius-lg;
+  }
+}
+
+// ── Left Poster Card (Static artwork, zero hover) ───────
+.posterCard {
+  position: relative;
+  background: linear-gradient(155deg, rgba(23, 23, 25, 0.96), rgba(10, 10, 12, 0.98));
+  border-right: 1px solid $border-glass;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  user-select: none;
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.gridOverlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(circle at 50% 50%, black 35%, transparent 85%);
+  pointer-events: none;
+}
+
+.glowOrb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--color-accent-glow, rgba(0, 144, 128, 0.32)) 0%,
+    transparent 70%
+  );
+  filter: blur(42px);
+  pointer-events: none;
+}
+
+.posterBadge {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 14px;
+  @include capsule-surface;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+
+  svg {
+    color: var(--color-accent);
+  }
+}
+
+.mascotWrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto 0;
+  padding: 24px 0;
+}
+
+.mascotImage {
+  max-width: 230px;
+  max-height: 230px;
+  object-fit: contain;
+  border-radius: $radius-lg;
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.65));
+  pointer-events: none;
+}
+
+.mascotFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  border-radius: $radius-xl;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-glass;
+}
+
+.posterFooter {
+  position: relative;
+  z-index: 2;
+}
+
+.posterFooterText {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  text-align: center;
+}
+
+// ── Right Form Card ─────────────────────────────────────
+.formCard {
+  padding: 40px 42px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(12, 15, 23, 0.55);
+
+  @include mobile {
+    padding: 28px 20px;
+  }
+}
+
+.mobileBrand {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text);
+
+  @include mobile {
+    display: flex;
+  }
+}
+
+.formHeader {
+  margin-bottom: 22px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: 0.02em;
+  line-height: 1.08;
+  text-transform: uppercase;
+
+  @include mobile {
+    font-size: 24px;
+  }
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.tabsWrap {
+  margin-bottom: 22px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eyeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: $radius-xs;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color $transition-fast, background $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.totpGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid $border-glass;
+  border-radius: $radius-md;
+}
+
+.totpLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.formExtra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.checkboxLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  accent-color: var(--color-accent);
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.textLink {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--color-accent-hover);
+  }
+}
+
+.submitBtn {
+  width: 100%;
+  margin-top: 6px;
+}

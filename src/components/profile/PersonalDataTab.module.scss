@@ -1,0 +1,331 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sectionCard {
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @include mobile {
+    padding: 18px;
+    border-radius: $radius-lg;
+    gap: 16px;
+  }
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionHeadBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.sectionSubtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+// ── Personal Fields Grid ────────────────────────────────
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(7, 9, 14, 0.55);
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+}
+
+.fieldMeta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.fieldValRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fieldIcon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.fieldValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ── Sessions ────────────────────────────────────────────
+.sessionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  padding-right: 4px;
+  @include scrollbar-sleek;
+}
+
+.sessionRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: rgba(7, 9, 14, 0.5);
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+}
+
+.sessionIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sessionInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sessionTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sessionName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.sessionSub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.revokeBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: $radius-sm;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.16);
+  color: var(--color-danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover {
+    background: var(--color-danger);
+    color: #ffffff;
+  }
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.logoutRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid $border-subtle;
+
+  @include mobile {
+    justify-content: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// ── Modals ──────────────────────────────────────────────
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fullBtn {
+  width: 100%;
+}
+
+.twoFaBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.qrWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: $radius-lg;
+  background: #ffffff;
+}
+
+.secretRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px 8px 14px;
+  background: rgba(7, 9, 14, 0.72);
+  border: 1px solid $border-glass;
+  border-radius: $radius-md;
+}
+
+.secretText {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copySecretBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: $radius-xs;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--color-accent);
+  }
+}
+
+.otpCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.otpLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.recoveryWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.warningAlert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: $radius-md;
+  color: var(--color-warning);
+  font-size: 13px;
+}
+
+.recoveryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.recoveryCode {
+  padding: 9px 12px;
+  background: rgba(7, 9, 14, 0.75);
+  border: 1px solid $border-glass;
+  border-radius: $radius-sm;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: center;
+  color: var(--color-text);
+}
