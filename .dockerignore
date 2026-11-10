@@ -1,6 +1,7 @@
 .git
 .github
 .playwright-mcp
+docs
 node_modules
 dist
 dist-ssr
