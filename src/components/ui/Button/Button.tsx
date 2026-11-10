@@ -1,66 +1,51 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react"
-import { Loader2 } from "lucide-react"
-import clsx from "clsx"
-import styles from "./Button.module.scss"
+import React from "react";
+import clsx from "clsx";
+import { Loader2 } from "lucide-react";
+import styles from "./Button.module.scss";
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger"
-  size?: "sm" | "md" | "lg"
-  loading?: boolean
-  isLoading?: boolean
-  icon?: ReactNode
-  leftIcon?: ReactNode
-  iconRight?: ReactNode
-  rightIcon?: ReactNode
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger" | "gradient";
+  size?: "sm" | "md" | "lg";
+  loading?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: "left" | "right";
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
-      className,
       variant = "primary",
       size = "md",
       loading = false,
-      isLoading = false,
-      disabled,
+      disabled = false,
       icon,
-      leftIcon,
-      iconRight,
-      rightIcon,
+      iconPosition = "left",
+      className,
       ...props
     },
-    ref,
+    ref
   ) => {
-    const isSpinning = loading || isLoading
-    const effectiveLeftIcon = icon || leftIcon
-    const effectiveRightIcon = iconRight || rightIcon
-
     return (
       <button
         ref={ref}
-        disabled={disabled || isSpinning}
+        disabled={disabled || loading}
         className={clsx(
           styles.button,
           styles[variant],
           styles[size],
-          isSpinning && styles.loading,
-          className,
+          loading && styles.loading,
+          className
         )}
         {...props}
       >
-        {isSpinning ? (
-          <Loader2 className={clsx(styles.spinner, styles.icon)} />
-        ) : (
-          effectiveLeftIcon && <span className={styles.icon}>{effectiveLeftIcon}</span>
-        )}
+        {loading && <Loader2 className={styles.spinner} size={size === "sm" ? 14 : size === "lg" ? 20 : 16} />}
+        {!loading && icon && iconPosition === "left" && <span className={styles.icon}>{icon}</span>}
         {children && <span className={styles.label}>{children}</span>}
-        {!isSpinning && effectiveRightIcon && (
-          <span className={styles.iconRight}>{effectiveRightIcon}</span>
-        )}
+        {!loading && icon && iconPosition === "right" && <span className={styles.icon}>{icon}</span>}
       </button>
-    )
-  },
-)
+    );
+  }
+);
 
-Button.displayName = "Button"
+Button.displayName = "Button";

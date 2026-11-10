@@ -1,47 +1,28 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from "react"
-import clsx from "clsx"
-import styles from "./Badge.module.scss"
+import React from "react";
+import clsx from "clsx";
+import styles from "./Badge.module.scss";
 
-export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: "success" | "warning" | "danger" | "info" | "neutral" | "accent"
-  size?: "sm" | "md"
-  dot?: boolean
-  pulse?: boolean
-  icon?: ReactNode
+export interface BadgeProps {
+  children: React.ReactNode;
+  variant?: "default" | "accent" | "success" | "warning" | "danger" | "muted";
+  size?: "sm" | "md";
+  dot?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  (
-    {
-      children,
-      className,
-      variant = "neutral",
-      size = "md",
-      dot = false,
-      pulse = false,
-      icon,
-      ...props
-    },
-    ref,
-  ) => {
-    return (
-      <span
-        ref={ref}
-        className={clsx(
-          styles.badge,
-          styles[variant],
-          styles[size],
-          pulse && styles.pulse,
-          className,
-        )}
-        {...props}
-      >
-        {(dot || pulse) && <span className={styles.dot} />}
-        {icon && <span className={styles.icon}>{icon}</span>}
-        <span className={styles.label}>{children}</span>
-      </span>
-    )
-  },
-)
-
-Badge.displayName = "Badge"
+export const Badge: React.FC<BadgeProps> = ({
+  children,
+  variant = "default",
+  size = "md",
+  dot = false,
+  className,
+  style,
+}) => {
+  return (
+    <span className={clsx(styles.badge, styles[variant], styles[size], className)} style={style}>
+      {dot && <span className={styles.dot} />}
+      <span className={styles.content}>{children}</span>
+    </span>
+  );
+};

@@ -1,0 +1,52 @@
+@property --iris-hole {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.wrapper {
+  position: relative;
+  min-height: 100%;
+}
+
+.irisOverlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background-color: var(--color-bg, #0a0a0b);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    var(--color-accent-subtle, rgba(0, 144, 128, 0.18)) 0%,
+    transparent 55%
+  );
+  --iris-hole: 0%;
+  mask-image: radial-gradient(
+    circle at 50% 50%,
+    transparent var(--iris-hole),
+    #000 calc(var(--iris-hole) + 22%)
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    transparent var(--iris-hole),
+    #000 calc(var(--iris-hole) + 22%)
+  );
+  animation: irisFeather 0.65s linear both;
+}
+
+@keyframes irisFeather {
+  0% {
+    --iris-hole: 0%;
+    opacity: 1;
+  }
+  100% {
+    --iris-hole: 150%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .irisOverlay {
+    display: none;
+  }
+}

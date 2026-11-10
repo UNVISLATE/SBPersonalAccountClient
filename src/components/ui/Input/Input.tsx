@@ -1,62 +1,41 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode } from "react"
+import React, { forwardRef } from "react"
 import clsx from "clsx"
 import styles from "./Input.module.scss"
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
+  hint?: string
   error?: string
-  helperText?: string
-  iconLeft?: ReactNode
-  leftIcon?: ReactNode
-  iconRight?: ReactNode
-  rightIcon?: ReactNode
+  leftIcon?: React.ReactNode
+  rightSlot?: React.ReactNode
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      label,
-      error,
-      helperText,
-      iconLeft,
-      leftIcon,
-      iconRight,
-      rightIcon,
-      className,
-      id,
-      ...props
-    },
-    ref,
-  ) => {
-    const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined)
-    const effectiveLeft = iconLeft || leftIcon
-    const effectiveRight = iconRight || rightIcon
+  ({ label, hint, error, leftIcon, rightSlot, className, id, ...props }, ref) => {
+    const inputId = id || (label ? `input-${Math.random().toString(36).slice(2, 9)}` : undefined)
 
     return (
-      <div className={clsx(styles.wrapper, className)}>
+      <div className={styles.root}>
         {label && (
           <label htmlFor={inputId} className={styles.label}>
             {label}
           </label>
         )}
-        <div className={clsx(styles.inputContainer, error && styles.hasError)}>
-          {effectiveLeft && <span className={styles.iconLeft}>{effectiveLeft}</span>}
+        <div className={clsx(styles.wrapper, error && styles.hasError)}>
+          {leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>}
           <input
             ref={ref}
             id={inputId}
-            className={clsx(styles.input, effectiveLeft && styles.paddedLeft, effectiveRight && styles.paddedRight)}
+            className={clsx(styles.input, leftIcon && styles.withLeft, rightSlot && styles.withRight, className)}
             {...props}
           />
-          {effectiveRight && <span className={styles.iconRight}>{effectiveRight}</span>}
+          {rightSlot && <span className={styles.rightSlot}>{rightSlot}</span>}
         </div>
-        {error ? (
-          <span className={styles.errorText}>{error}</span>
-        ) : (
-          helperText && <span className={styles.helperText}>{helperText}</span>
-        )}
+        {error && <p className={styles.error}>{error}</p>}
+        {!error && hint && <p className={styles.hint}>{hint}</p>}
       </div>
     )
-  },
+  }
 )
 
 Input.displayName = "Input"

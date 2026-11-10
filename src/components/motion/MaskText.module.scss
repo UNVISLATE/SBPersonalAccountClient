@@ -1,0 +1,70 @@
+.maskText {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.inner {
+  display: inline-block;
+  animation-duration: var(--mask-duration, 0.7s);
+  animation-delay: var(--mask-delay, 0ms);
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+  will-change: transform;
+
+  &[data-direction="up"] {
+    animation-name: maskSlideUp;
+  }
+  &[data-direction="down"] {
+    animation-name: maskSlideDown;
+  }
+  &[data-direction="left"] {
+    animation-name: maskSlideLeft;
+  }
+  &[data-direction="right"] {
+    animation-name: maskSlideRight;
+  }
+}
+
+@keyframes maskSlideUp {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes maskSlideDown {
+  from {
+    transform: translateY(-105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes maskSlideLeft {
+  from {
+    transform: translateX(105%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes maskSlideRight {
+  from {
+    transform: translateX(-105%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner {
+    animation: none !important;
+    transform: none !important;
+  }
+}

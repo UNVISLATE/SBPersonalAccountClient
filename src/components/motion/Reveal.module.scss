@@ -1,0 +1,170 @@
+.reveal {
+  --reveal-duration: 0.65s;
+  --reveal-delay: 0ms;
+  --reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  animation-duration: var(--reveal-duration);
+  animation-delay: var(--reveal-delay);
+  animation-timing-function: var(--reveal-ease);
+  animation-fill-mode: both;
+  will-change: transform, opacity;
+
+  &[data-visible="false"] {
+    opacity: 0;
+    animation-name: none;
+  }
+
+  &[data-visible="true"][data-stagger="false"] {
+    &[data-variant="fade"] {
+      animation-name: revealFade;
+    }
+    &[data-variant="fade-up"] {
+      animation-name: revealFadeUp;
+    }
+    &[data-variant="fade-down"] {
+      animation-name: revealFadeDown;
+    }
+    &[data-variant="fade-left"] {
+      animation-name: revealFadeLeft;
+    }
+    &[data-variant="fade-right"] {
+      animation-name: revealFadeRight;
+    }
+    &[data-variant="fade-blur"] {
+      animation-name: revealFadeBlur;
+    }
+    &[data-variant="scale"] {
+      animation-name: revealScale;
+    }
+  }
+
+  &[data-stagger="true"] > :where([data-reveal-item]) {
+    opacity: 0;
+  }
+
+  &[data-visible="true"][data-stagger="true"] > :where([data-reveal-item]) {
+    animation-duration: var(--reveal-duration);
+    animation-timing-function: var(--reveal-ease);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--reveal-delay) + var(--stagger-index, 0) * var(--stagger-step, 60ms));
+  }
+
+  &[data-visible="true"][data-stagger="true"][data-variant="fade"] > :where([data-reveal-item]) {
+    animation-name: revealFade;
+  }
+  &[data-visible="true"][data-stagger="true"][data-variant="fade-up"] > :where([data-reveal-item]) {
+    animation-name: revealFadeUp;
+  }
+  &[data-visible="true"][data-stagger="true"][data-variant="fade-down"] > :where([data-reveal-item]) {
+    animation-name: revealFadeDown;
+  }
+  &[data-visible="true"][data-stagger="true"][data-variant="fade-left"] > :where([data-reveal-item]) {
+    animation-name: revealFadeLeft;
+  }
+  &[data-visible="true"][data-stagger="true"][data-variant="fade-right"] > :where([data-reveal-item]) {
+    animation-name: revealFadeRight;
+  }
+  &[data-visible="true"][data-stagger="true"][data-variant="fade-blur"] > :where([data-reveal-item]) {
+    animation-name: revealFadeBlur;
+  }
+  &[data-visible="true"][data-stagger="true"][data-variant="scale"] > :where([data-reveal-item]) {
+    animation-name: revealScale;
+  }
+}
+
+@keyframes revealFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes revealFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes revealFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes revealFadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealFadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealFadeBlur {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0);
+  }
+}
+
+@keyframes revealScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Keep 60fps on mobile by skipping heavy blur filters
+@media (max-width: 767px) {
+  .reveal[data-visible="true"][data-stagger="false"][data-variant="fade-blur"] {
+    animation-name: revealFadeUp;
+  }
+  .reveal[data-visible="true"][data-stagger="true"][data-variant="fade-blur"] > :where([data-reveal-item]) {
+    animation-name: revealFadeUp;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal > :where([data-reveal-item]) {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}

@@ -1,0 +1,43 @@
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(10, 13, 20, 0.5) 0%,
+    rgba(24, 30, 44, 0.85) 45%,
+    rgba(30, 37, 54, 0.9) 55%,
+    rgba(10, 13, 20, 0.5) 100%
+  );
+  background-size: 300% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: $radius-md;
+}
+
+.circle {
+  border-radius: $radius-full;
+}
+
+.text {
+  height: 14px;
+  border-radius: $radius-xs;
+}
+
+.rounded_xs { border-radius: $radius-xs; }
+.rounded_sm { border-radius: $radius-sm; }
+.rounded_md { border-radius: $radius-md; }
+.rounded_lg { border-radius: $radius-lg; }
+.rounded_xl { border-radius: $radius-xl; }
+.rounded_full { border-radius: $radius-full; }
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

@@ -1,0 +1,86 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px;
+  border-radius: $radius-full;
+  background: var(--color-card-subtle);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  overflow-x: auto;
+  @include hide-scrollbar;
+
+  @include mobile {
+    border-radius: $radius-lg;
+    padding: 6px 8px;
+  }
+}
+
+.tabsTrack {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: $radius-full;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: color $transition-fast;
+  z-index: 1;
+
+  &:hover {
+    color: var(--color-text);
+  }
+
+  &.active {
+    color: var(--color-text);
+  }
+
+  @include mobile {
+    padding: 8px 13px;
+    font-size: 13px;
+  }
+}
+
+.activePill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.tabIcon {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.85;
+}
+
+.badge {
+  padding: 1px 7px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent-hover);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}

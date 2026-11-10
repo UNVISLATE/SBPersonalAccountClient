@@ -4,53 +4,62 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: $font-sans;
   font-weight: 600;
-  border-radius: $radius-full;
-  user-select: none;
+  border-radius: 9999px;
   white-space: nowrap;
-  width: fit-content;
-  line-height: 1;
-
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
-
-  .icon {
-    display: inline-flex;
-    align-items: center;
-  }
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
 }
 
-// Sizes
 .sm {
   padding: 3px 8px;
   font-size: 11px;
 }
 
 .md {
-  padding: 4px 10px;
+  padding: 5px 12px;
   font-size: 12px;
 }
 
-// Variants
+.default {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  .dot {
+    background: #94a3b8;
+  }
+}
+
+.accent {
+  background: var(--color-accent-subtle, rgba(123, 44, 191, 0.15));
+  color: #ffffff;
+  border: 1px solid var(--color-accent, #{$accent-default});
+  box-shadow: 0 0 12px var(--color-accent-subtle, rgba(123, 44, 191, 0.2));
+
+  .dot {
+    background: var(--color-accent, #{$accent-default});
+    box-shadow: 0 0 8px var(--color-accent, #{$accent-default});
+  }
+}
+
 .success {
-  background: $status-success-bg;
+  background: rgba(16, 185, 129, 0.12);
   color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
 
   .dot {
     background: #10b981;
     box-shadow: 0 0 8px #10b981;
+    animation: pulseDot 2s infinite ease-in-out;
   }
 }
 
 .warning {
-  background: $status-warning-bg;
+  background: rgba(245, 158, 11, 0.12);
   color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.28);
 
   .dot {
     background: #f59e0b;
@@ -59,9 +68,9 @@
 }
 
 .danger {
-  background: $status-danger-bg;
+  background: rgba(239, 68, 68, 0.12);
   color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.28);
 
   .dot {
     background: #ef4444;
@@ -69,34 +78,30 @@
   }
 }
 
-.info {
-  background: $status-info-bg;
-  color: #38bdf8;
-  border: 1px solid rgba(14, 165, 233, 0.25);
+.muted {
+  background: rgba(255, 255, 255, 0.04);
+  color: #64748b;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 
   .dot {
-    background: #0ea5e9;
-    box-shadow: 0 0 8px #0ea5e9;
+    background: #64748b;
   }
 }
 
-.accent {
-  background: $accent-primary-muted;
-  color: $accent-primary;
-  border: 1px solid rgba(0, 255, 200, 0.3);
-
-  .dot {
-    background: $accent-primary;
-    box-shadow: 0 0 8px $accent-primary;
-  }
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.neutral {
-  background: rgba(255, 255, 255, 0.05);
-  color: $text-secondary;
-  border: 1px solid $border-glass;
-
-  .dot {
-    background: $text-muted;
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
   }
 }

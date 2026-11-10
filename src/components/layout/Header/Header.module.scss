@@ -1,0 +1,449 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.headerWrap {
+  position: sticky;
+  top: 14px;
+  z-index: $z-header;
+  width: 100%;
+  padding: 0 24px;
+  pointer-events: none;
+
+  @include mobile {
+    top: 10px;
+    padding: 0 16px;
+  }
+}
+
+.header {
+  pointer-events: auto;
+  max-width: 1360px;
+  margin: 0 auto;
+  border-radius: 14px;
+  background: rgba(17, 17, 20, 0.88);
+  backdrop-filter: blur(20px) saturate(1.35);
+  -webkit-backdrop-filter: blur(20px) saturate(1.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 12px 36px -10px rgba(0, 0, 0, 0.68),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  @include mobile {
+    border-radius: 12px;
+  }
+}
+
+.container {
+  width: 100%;
+  padding: 0 18px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  @include mobile {
+    padding: 0 14px;
+    height: 54px;
+    gap: 10px;
+  }
+}
+
+// ── Brand ──────────────────────────────────────────────
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo {
+  border-radius: 8px;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+
+  @include mobile {
+    font-size: 15px;
+  }
+}
+
+// ── Desktop Nav ────────────────────────────────────────
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color $transition-fast, background $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.navLinkActive {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+// ── Right Section ─────────────────────────────────────
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+// Balance chip
+.balanceChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 6px 0 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $border-glass;
+  border-radius: $radius-full;
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.walletIcon {
+  color: var(--color-text-muted);
+}
+
+.balanceAmt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.bonusAmt {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: $radius-full;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent-hover);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.plusBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: $radius-full;
+  background: var(--color-accent);
+  color: #fff;
+  cursor: pointer;
+  transition: background $transition-fast, transform $transition-fast;
+
+  &:hover {
+    background: var(--color-accent-hover);
+    transform: scale(1.1);
+  }
+}
+
+// Avatar
+.avatarWrap {
+  position: relative;
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.avatarBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $border-glass;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: $border-glass-hover;
+  }
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  background: var(--color-accent-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarInitials {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+}
+
+.avatarLogin {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Dropdown
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: rgba(20, 20, 22, 0.98);
+  border: 1px solid $border-glass;
+  border-radius: $radius-md;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  z-index: $z-dropdown;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text);
+  }
+}
+
+.dropdownItemDanger {
+  &:hover {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--color-danger);
+  }
+}
+
+// Login button (guest state)
+.loginBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: $radius-full;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background $transition-fast, transform $transition-fast;
+
+  &:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  @include mobile {
+    display: none;
+  }
+}
+
+// ── Hamburger ─────────────────────────────────────────
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid $border-glass;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  @include mobile {
+    display: flex;
+  }
+}
+
+// ── Mobile Overlay ────────────────────────────────────
+.mobileOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  background: rgba(10, 10, 11, 0.98);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px 32px;
+  overflow-y: auto;
+}
+
+.mobileTopBar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid $border-subtle;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  border-radius: $radius-md;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+  transition: color $transition-fast, background $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.mobileNavLinkActive {
+  color: var(--color-text);
+}
+
+.mobileActions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 24px;
+  border-top: 1px solid $border-glass;
+}
+
+.mobileActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: $radius-md;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-subtle;
+  cursor: pointer;
+  text-align: left;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--color-text);
+  }
+}
+
+.mobileLogout {
+  &:hover {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--color-danger);
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+}
+
+.mobileLoginBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: $radius-md;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+  color: #fff;
+  text-decoration: none;
+  background: var(--color-accent);
+  transition: background $transition-fast;
+
+  &:hover {
+    background: var(--color-accent-hover);
+  }
+}
+
+.mobileFooter {
+  margin-top: 32px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--color-text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
