@@ -1,176 +1,148 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.page {
+  width: 100%;
+  padding: 28px 24px 64px;
+
+  @include mobile {
+    padding: 18px 16px 48px;
+  }
+}
+
 .container {
+  max-width: 1360px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-
-  .titleGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    .title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--color-text);
-      letter-spacing: -0.02em;
-    }
-
-    .sub {
-      font-size: 0.875rem;
-      color: var(--color-text-muted);
-    }
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-
-  .filterBtn {
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--color-text-muted);
-    padding: 6px 14px;
-    border-radius: var(--radius-sm);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all var(--transition-fast);
-
-    &:hover {
-      color: var(--color-text);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    &.active {
-      background: var(--color-accent-subtle);
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-    }
-  }
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
+  @include mobile {
+    gap: 16px;
   }
 }
 
-.card {
-  background: rgba(14, 18, 25, 0.7);
-  border: 1px solid var(--color-glass-border);
-  border-radius: var(--radius-md);
-  padding: 24px;
+.controlsStack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  transition: all var(--transition-fast);
+  gap: 12px;
+}
+
+.sortRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  @include hide-scrollbar;
+}
+
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-subtle;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast, border-color $transition-fast, color $transition-fast;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.16);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  }
-
-  .cardTop {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-
-    .iconBox {
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-sm);
-      background: var(--color-accent-subtle);
-      color: var(--color-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: var(--radius-sm);
-      }
-    }
-
-    .titles {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      flex: 1;
-
-      .name {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--color-text);
-      }
-
-      .category {
-        font-size: 0.75rem;
-        color: var(--color-text-dim);
-      }
-    }
-  }
-
-  .desc {
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    line-height: 1.5;
-    flex: 1;
-  }
-
-  .pricingRow {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .priceLabel {
-      font-size: 0.75rem;
-      color: var(--color-text-dim);
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    .priceVal {
-      font-family: var(--font-mono);
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--color-accent);
-    }
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text);
   }
 }
 
-.empty {
-  padding: 60px 20px;
-  text-align: center;
-  background: rgba(14, 18, 25, 0.4);
-  border: 1px dashed var(--color-glass-border);
-  border-radius: var(--radius-lg);
+.sortActive {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: $border-glass-hover;
+  color: var(--color-text);
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @include tablet {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.emptyState {
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 56px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  color: var(--color-text-dim);
+  text-align: center;
+  gap: 10px;
+}
+
+.emptyIconWrap {
+  width: 58px;
+  height: 58px;
+  border-radius: $radius-lg;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-glass;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.emptySubtitle {
+  margin: 0;
+  max-width: 380px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.loadMoreSentinel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+}
+
+.loadingBatchPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-glass;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.spinIcon {
+  animation: spin 0.9s linear infinite;
+  color: var(--color-accent);
 }

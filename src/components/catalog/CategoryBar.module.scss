@@ -1,0 +1,89 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scrollRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  @include hide-scrollbar;
+}
+
+.catPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: $radius-full;
+  background: rgba(14, 17, 25, 0.72);
+  border: 1px solid $border-glass;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast, border-color $transition-fast, color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text);
+  }
+}
+
+.catActive {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: #ffffff;
+}
+
+.pillCount {
+  padding: 2px 7px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.subRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  @include hide-scrollbar;
+}
+
+.subPill {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: $radius-full;
+  background: transparent;
+  border: 1px solid $border-subtle;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast, color $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.subActive {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: $border-glass-hover;
+  color: var(--color-text);
+}

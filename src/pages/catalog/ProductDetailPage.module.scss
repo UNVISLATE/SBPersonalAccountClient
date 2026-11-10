@@ -1,0 +1,734 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.page {
+  width: 100%;
+  padding: 24px 24px 64px;
+
+  @include mobile {
+    padding: 16px 16px 48px;
+  }
+}
+
+.container {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.breadLink {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+  }
+}
+
+.breadDivider {
+  color: var(--color-text-dim);
+}
+
+.breadCurrent {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.layoutGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+
+  @include tablet {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+// ── Hero Card ───────────────────────────────────────────
+.heroCard {
+  position: relative;
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 28px;
+  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+
+  @include mobile {
+    padding: 20px;
+    min-height: 170px;
+    border-radius: $radius-lg;
+  }
+}
+
+.gridOverlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.categoryBadge,
+.deliveryBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  @include capsule-surface;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.categoryBadge svg {
+  color: var(--color-accent-hover);
+}
+
+.productTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.6vw, 40px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--color-text);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badgesRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// ── Media Gallery ───────────────────────────────────────
+.mediaSection {
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 14px;
+
+  @include mobile {
+    border-radius: $radius-lg;
+  }
+}
+
+.sliderControlsWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sliderNavBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid $border-glass;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.thumbnailsSlider {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+
+  @include mobile {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.thumbBtn {
+  aspect-ratio: 16 / 10;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid $border-glass;
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color $transition-fast, transform $transition-fast;
+
+  &:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+}
+
+.thumbImg,
+.thumbVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.videoThumbWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.videoThumbBadge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+}
+
+// ── Description ─────────────────────────────────────────
+.descriptionSection {
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  @include mobile {
+    padding: 18px;
+    border-radius: $radius-lg;
+  }
+}
+
+.descHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.descIcon {
+  color: var(--color-accent-hover);
+}
+
+.descTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.descBody {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+
+  p {
+    margin: 0 0 10px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul, ol {
+    margin: 8px 0;
+    padding-left: 18px;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--color-text);
+  }
+}
+
+// ── Right Checkout Sidebar ──────────────────────────────
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 84px;
+  min-width: 0;
+
+  @include tablet {
+    position: static;
+  }
+}
+
+.balancePillWidget {
+  @include glass-panel;
+  border-radius: $radius-lg;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.balanceLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.balanceIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-md;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.balanceTextWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.balancePillLabel {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.balancePillVal {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.bonusPillVal {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-accent-hover);
+}
+
+.pillTopUpBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid $border-glass;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+}
+
+.checkoutBox {
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  @include mobile {
+    padding: 18px;
+    border-radius: $radius-lg;
+  }
+}
+
+.checkoutTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.tiersSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tierCard {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: $radius-md;
+  background: rgba(7, 9, 14, 0.55);
+  border: 1px solid $border-glass;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.tierStatic {
+  cursor: default;
+  &:hover {
+    background: var(--color-accent-subtle);
+  }
+}
+
+.tierSelected {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+}
+
+.tierLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tierLabel {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tierMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tierGroup {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.customPriceBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.currencyTag {
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.configSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sliderComp {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(7, 9, 14, 0.52);
+  border: 1px solid $border-glass;
+  border-radius: $radius-md;
+}
+
+.sliderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sliderLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.sliderVal {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sliderDelta {
+  font-weight: 500;
+  color: var(--color-accent-hover);
+}
+
+.rangeInput {
+  width: 100%;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.tierPrice {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.radioDot {
+  width: 18px;
+  height: 18px;
+  border-radius: $radius-full;
+  border: 2px solid $border-glass-hover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.innerDot {
+  width: 9px;
+  height: 9px;
+  border-radius: $radius-full;
+  background: var(--color-accent);
+}
+
+.paymentMethodSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.methodHeaderLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.methodsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.methodCard {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: $radius-md;
+  background: rgba(7, 9, 14, 0.52);
+  border: 1px solid $border-glass;
+  cursor: pointer;
+  text-align: left;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.methodSelected {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+}
+
+.methodInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.methodName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.methodSub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+// ── Promo ───────────────────────────────────────────────
+.promoContainer {
+  padding-top: 4px;
+}
+
+.promoTriggerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.promoTextWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.promoTagIcon {
+  color: var(--color-accent-hover);
+}
+
+.promoLinkBtn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent-hover);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.promoForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.promoInputRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.promoSuccessText {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-success);
+}
+
+// ── Terms & Submit ──────────────────────────────────────
+.termsLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  accent-color: var(--color-accent);
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.termsText {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.checkoutBtn {
+  width: 100%;
+}
+
+// ── Empty / Error ───────────────────────────────────────
+.emptyState {
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.emptyIconWrap {
+  width: 58px;
+  height: 58px;
+  border-radius: $radius-lg;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-glass;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.emptySubtitle {
+  margin: 0 0 8px;
+  max-width: 360px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}

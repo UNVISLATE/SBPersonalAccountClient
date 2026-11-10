@@ -1,0 +1,139 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.hero {
+  position: relative;
+  @include glass-panel;
+  border-radius: $radius-xl;
+  padding: 28px 32px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+
+  @include tablet {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  @include mobile {
+    padding: 20px 18px;
+    border-radius: $radius-lg;
+    gap: 16px;
+  }
+}
+
+.gridOverlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(120deg, black 25%, transparent 90%);
+  pointer-events: none;
+}
+
+.ambientGlow {
+  position: absolute;
+  right: -60px;
+  top: -80px;
+  width: 340px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--color-accent-subtle, rgba(0, 144, 128, 0.22)) 0%,
+    transparent 70%
+  );
+  filter: blur(45px);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.topMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  @include capsule-surface;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+
+  svg {
+    color: var(--color-accent-hover);
+  }
+}
+
+.counter {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.8vw, 44px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.searchBox {
+  position: relative;
+  z-index: 2;
+  width: 340px;
+  flex-shrink: 0;
+
+  @include tablet {
+    width: 100%;
+  }
+}
+
+.clearBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-xs;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color $transition-fast, background $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.07);
+  }
+}

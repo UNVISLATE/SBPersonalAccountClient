@@ -1,0 +1,369 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.presetsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  @include mobile {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.presetBtn {
+  height: 40px;
+  padding: 0 10px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-glass;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast, color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text);
+  }
+}
+
+.presetActive {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: #ffffff;
+}
+
+.currencyTag {
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.conversionHint {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 8px 12px;
+  border-radius: $radius-md;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-subtle;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+
+  strong {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+}
+
+.currencyPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.currencyPill {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-glass;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast, color $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+  }
+}
+
+.currencyPillActive {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #ffffff;
+}
+
+.loadingList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.providersList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.providerCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-glass;
+  border-radius: $radius-md;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: $border-glass-hover;
+  }
+}
+
+.featuredCard {
+  margin-top: 8px;
+}
+
+.recommendedPill {
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  padding: 2px 9px;
+  border-radius: $radius-full;
+  background: var(--color-accent);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.providerSelected {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-subtle);
+
+  &:hover {
+    background: var(--color-accent-subtle);
+  }
+
+  .providerIcon {
+    color: var(--color-accent-hover);
+  }
+}
+
+.radioDot {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 2px solid $border-glass-hover;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .providerSelected & {
+    border-color: var(--color-accent);
+  }
+}
+
+.innerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.providerIconBox {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.providerIcon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.providerImg {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.providerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.providerName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.providerCurrency {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feeBadge {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.feeFree {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #34d399;
+}
+
+.feeWarn {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.otherToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: $radius-md;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid $border-glass;
+  text-align: left;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: $border-glass-hover;
+  }
+}
+
+.stackedIcons {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stackedIconItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: $radius-full;
+  background: #18181b;
+  border: 2px solid #0e0e11;
+  overflow: hidden;
+
+  & + & {
+    margin-left: -8px;
+  }
+}
+
+.miniProviderImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.miniProviderIcon {
+  color: var(--color-text-muted);
+}
+
+.moreCountBadge {
+  padding: 2px 7px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.chevronCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.24s $ease-out-expo;
+
+  &.chevronOpen {
+    transform: rotate(180deg);
+  }
+}
+
+.otherListFlatMotion {
+  overflow: hidden;
+}
+
+.otherListFlat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emptyProviders {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed $border-glass;
+  border-radius: $radius-md;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.submitBtn {
+  width: 100%;
+}

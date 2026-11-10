@@ -1,0 +1,182 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 330px;
+  padding: 16px;
+  border-radius: $radius-xl;
+  background: rgba(18, 18, 20, 0.92);
+  border: 1px solid $border-glass;
+  overflow: hidden;
+  text-decoration: none;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 330px;
+  contain: layout style;
+  transition:
+    border-color $transition-normal,
+    transform $transition-normal,
+    box-shadow $transition-normal;
+
+  @include mobile {
+    min-height: 280px;
+    border-radius: $radius-lg;
+  }
+
+  &:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 44px -12px rgba(0, 0, 0, 0.7), 0 0 24px -6px var(--color-accent-subtle);
+
+    .artwork {
+      transform: scale(1.04);
+    }
+
+    .ctaChip {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #ffffff;
+    }
+  }
+}
+
+.artwork {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.55s $ease-out-expo;
+  z-index: 0;
+}
+
+.fallbackArt {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, rgba(20, 25, 40, 0.95) 0%, rgba(8, 10, 17, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+}
+
+.fallbackGrid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.fallbackInitials {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.06);
+  letter-spacing: 0.06em;
+  user-select: none;
+  margin-bottom: 42px;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 11, 0.25) 0%,
+    rgba(10, 10, 11, 0.52) 48%,
+    rgba(10, 10, 11, 0.94) 92%
+  );
+  z-index: 1;
+}
+
+.topRow {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bottomPlate {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: $radius-lg;
+  background: rgba(12, 15, 23, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.catLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-accent-hover);
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid $border-subtle;
+}
+
+.priceWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.pricePrefix {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.priceVal {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: 0.02em;
+}
+
+.ctaChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid $border-glass;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background $transition-fast, border-color $transition-fast, color $transition-fast;
+}

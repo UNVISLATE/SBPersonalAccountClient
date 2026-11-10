@@ -1,0 +1,201 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: $z-lightbox;
+  background: rgba(4, 6, 10, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  user-select: none;
+
+  @include mobile {
+    padding: 12px;
+  }
+}
+
+.lightboxBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 100%;
+  max-height: 100%;
+
+  @include mobile {
+    gap: 12px;
+  }
+}
+
+.carouselRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 100%;
+
+  @include mobile {
+    gap: 6px;
+  }
+}
+
+.mediaFrame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(82vw, 960px);
+  max-height: 78vh;
+  border-radius: $radius-lg;
+  overflow: hidden;
+
+  @include mobile {
+    max-width: calc(100vw - 104px);
+    max-height: 72vh;
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 25;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.85));
+  transition: color 0.18s ease;
+
+  &:hover {
+    color: #ffffff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @include mobile {
+    top: 8px;
+    right: 8px;
+  }
+}
+
+.navBtn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.75));
+  transition: color 0.18s ease;
+
+  &:hover {
+    color: #ffffff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @include mobile {
+    width: 32px;
+    height: 44px;
+  }
+}
+
+.slideStage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.videoWrapper {
+  width: min(80vw, 940px);
+  max-height: 78vh;
+  aspect-ratio: 16 / 9;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+
+  @include mobile {
+    width: calc(100vw - 104px);
+    max-height: 72vh;
+  }
+}
+
+.image {
+  max-width: min(80vw, 940px);
+  max-height: 78vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: $radius-lg;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+
+  @include mobile {
+    max-width: calc(100vw - 104px);
+    max-height: 72vh;
+  }
+}
+
+.counterBar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.counterSlot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15em;
+  height: 22px;
+  overflow: hidden;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.counterCurrent {
+  display: inline-block;
+  line-height: 22px;
+}
+
+.counterDivider {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.counterTotal {
+  color: rgba(255, 255, 255, 0.72);
+}

@@ -1,0 +1,538 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.checkoutModalRoot {
+  :global([class*="content"]) {
+    padding: 0 !important;
+  }
+}
+
+.splitGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  height: min(560px, 82dvh);
+  max-height: 82dvh;
+  overflow: hidden;
+
+  @include mobile {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+.leftCol {
+  min-width: 0;
+  min-height: 0;
+  padding: 26px 26px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  @include scrollbar-sleek;
+
+  @include mobile {
+    padding: 6px 14px 16px;
+    gap: 14px;
+    overflow-y: visible;
+  }
+}
+
+.leftHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text);
+
+  @include mobile {
+    font-size: 19px;
+  }
+}
+
+.methodsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.methodCard {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: $radius-md;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid $border-glass;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background $transition-fast,
+    border-color $transition-fast,
+    box-shadow $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: $border-glass-hover;
+  }
+}
+
+.featuredCard {
+  margin-top: 6px;
+}
+
+.methodSelected {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-subtle);
+
+  &:hover {
+    background: var(--color-accent-subtle);
+  }
+}
+
+.methodDisabledHint {
+  opacity: 0.85;
+}
+
+.recommendedPill {
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  padding: 2px 9px;
+  border-radius: $radius-full;
+  background: var(--color-accent);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  box-shadow: 0 4px 12px var(--color-accent-glow);
+}
+
+.radioDot {
+  width: 18px;
+  height: 18px;
+  border-radius: $radius-full;
+  border: 2px solid $border-glass-hover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.innerDot {
+  width: 9px;
+  height: 9px;
+  border-radius: $radius-full;
+  background: var(--color-accent);
+}
+
+.balanceIconBadge {
+  width: 30px;
+  height: 30px;
+  border-radius: $radius-sm;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.methodMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.methodTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @include mobile {
+    white-space: normal;
+  }
+}
+
+.methodSubtext {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconStrip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.providerImg {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.providerFallback {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.currencyLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.feeBadge {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.feeFree {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #34d399;
+}
+
+.feeWarn {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+// ── Collapsible "Другие способы" (Flat toggle + inline list) ──
+.otherToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: $radius-md;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid $border-glass;
+  text-align: left;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: $border-glass-hover;
+  }
+}
+
+.stackedIcons {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stackedIconItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: $radius-full;
+  background: #18181b;
+  border: 2px solid #0e0e11;
+  overflow: hidden;
+
+  & + & {
+    margin-left: -8px;
+  }
+}
+
+.miniProviderImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.miniProviderFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.moreCountBadge {
+  padding: 2px 7px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.chevronCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.24s $ease-out-expo;
+
+  &.chevronOpen {
+    transform: rotate(180deg);
+  }
+}
+
+.otherListFlatMotion {
+  overflow: hidden;
+}
+
+.otherListFlat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inlineTopUpLink {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-accent-hover);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.trustFooter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+// ── Right Column: Summary & Totals ────────────────────────
+.rightCol {
+  min-width: 0;
+  min-height: 0;
+  padding: 24px 24px 22px;
+  background: rgba(14, 14, 16, 0.6);
+  border-left: 1px solid $border-subtle;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  @include scrollbar-sleek;
+
+  @include mobile {
+    border-left: none;
+    border-top: 1px solid $border-subtle;
+    padding: 16px 14px 20px;
+    gap: 14px;
+    overflow-y: visible;
+  }
+}
+
+.rightHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rightHeading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.desktopCloseBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: $radius-sm;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $border-subtle;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text);
+  }
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.productSummary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: $radius-md;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-subtle;
+}
+
+.productThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-sm;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent-hover);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.productMeta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.productTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productSub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.breakRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.savingRow {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.feeRow {
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+.bonusTipRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: $radius-sm;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent-hover);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.totalFooter {
+  border-top: 1px solid $border-subtle;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.totalRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.totalLabel {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.totalAmount {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: 0.02em;
+}
+
+.confirmBtn {
+  width: 100%;
+}
+
+.feeNote {
+  margin: 0;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+
+.feeNoteFree {
+  color: #34d399;
+}

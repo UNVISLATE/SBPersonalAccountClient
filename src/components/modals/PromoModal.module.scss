@@ -1,0 +1,56 @@
+@use "@/styles/variables" as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  height: 46px;
+  background: rgba(8, 10, 16, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0 14px 0 44px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: var(--color-accent, #{$accent-default});
+    box-shadow: 0 0 16px var(--color-accent-glow, rgba(123, 44, 191, 0.3));
+  }
+
+  &::placeholder {
+    text-transform: none;
+    letter-spacing: normal;
+    color: #475569;
+  }
+}
+
+.submitBtn {
+  width: 100%;
+}

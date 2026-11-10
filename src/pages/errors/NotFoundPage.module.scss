@@ -1,0 +1,63 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+}
+
+.container {
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mascotWrap {
+  margin-bottom: 12px;
+  user-select: none;
+}
+
+.mascot {
+  max-width: 190px;
+  max-height: 190px;
+  object-fit: contain;
+  border-radius: $radius-lg;
+  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.5));
+  pointer-events: none;
+}
+
+.code {
+  font-family: var(--font-display);
+  font-size: 84px;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  margin-bottom: 12px;
+
+  @include mobile {
+    font-size: 64px;
+  }
+}
+
+.title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0 0 28px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
