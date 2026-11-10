@@ -1,0 +1,11 @@
+.git
+.github
+.playwright-mcp
+node_modules
+dist
+dist-ssr
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
