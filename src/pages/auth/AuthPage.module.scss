@@ -301,3 +301,55 @@
   width: 100%;
   margin-top: 6px;
 }
+
+.oauthDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 2px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: $border-glass;
+  }
+}
+
+.oauthList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.oauthBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-glass;
+  border-radius: $radius-sm;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.oauthIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}

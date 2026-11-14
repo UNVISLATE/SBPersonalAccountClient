@@ -6,7 +6,8 @@ export interface GetServicesParams {
   catalog_id?: number
   limit?: number
   offset?: number
-  search?: string
+  q?: string
+  sort?: string
 }
 
 function normalizeServiceMedia(service: CatalogService): CatalogService {

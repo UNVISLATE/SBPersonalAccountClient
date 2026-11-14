@@ -23,7 +23,8 @@ interface AuthContextValue {
   isAuthenticated: boolean
   login: (login: string, password: string, totp?: string) => Promise<UserProfile | null>
   register: (login: string, email: string, password: string) => Promise<UserProfile | null>
-  claimGuestAccount: (code: string, password: string) => Promise<UserProfile | null>
+  requestGuestClaim: (email: string) => Promise<{ claim_token: string; ttl_seconds: number }>
+  claimGuestAccount: (claim_token: string, code: string, password: string) => Promise<UserProfile | null>
   logout: () => Promise<void>
   refreshUser: () => Promise<UserProfile | null>
 }
@@ -146,8 +147,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
         return await refreshUser()
       },
-      async claimGuestAccount(claim_code: string, password: string) {
-        await api.post("/auth/claim-guest-account/verify", { claim_code, password })
+      async requestGuestClaim(email: string) {
+        return await api.post<{ claim_token: string; ttl_seconds: number }>(
+          "/auth/claim-guest-account/request",
+          { email }
+        )
+      },
+      async claimGuestAccount(claim_token: string, code: string, password: string) {
+        await api.post("/auth/claim-guest-account/verify", { claim_token, code, password })
         return await refreshUser()
       },
       async logout() {

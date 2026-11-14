@@ -1,4 +1,4 @@
-import { api } from "@/api/client"
+import { api, refreshAccessToken } from "@/api/client"
 import { buildMediaUrl, resolveAssetUrl } from "@/config/env"
 import type {
   UserProfile,
@@ -37,18 +37,28 @@ export const changePassword = (current_password: string, new_password: string) =
 
 export const uploadAvatar = async (file: File): Promise<void> => {
   const tokenRes = await api.post<{ upload_token: string; upload_url: string }>(
-    buildMediaUrl("/upload?tag=avatar")
+    "/api/media/upload?tag=avatar"
   )
   const rawUploadUrl = tokenRes.upload_url || `/api/media/upload/${tokenRes.upload_token}`
-  const uploadUrl = buildMediaUrl(rawUploadUrl)
-  const upRes = await fetch(uploadUrl, {
-    method: "POST",
-    body: file,
-    credentials: "include",
-    headers: {
-      "Content-Type": file.type || "application/octet-stream",
-    },
-  })
+  const uploadUrl = /^https?:\/\//i.test(rawUploadUrl) ? rawUploadUrl : buildMediaUrl(rawUploadUrl)
+
+  const doUpload = async () =>
+    fetch(uploadUrl, {
+      method: "POST",
+      body: file,
+      credentials: "include",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+      },
+    })
+
+  let upRes = await doUpload()
+  if (upRes.status === 401) {
+    const refreshed = await refreshAccessToken()
+    if (refreshed) {
+      upRes = await doUpload()
+    }
+  }
   if (!upRes.ok) throw new Error(`Upload error: ${upRes.statusText}`)
   const uploaded = (await upRes.json()) as { token?: string }
 

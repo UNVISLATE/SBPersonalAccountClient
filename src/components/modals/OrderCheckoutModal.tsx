@@ -31,7 +31,7 @@ export interface OrderCheckoutModalProps {
   providers: PaymentProvider[];
   isSubmitting: boolean;
   onOpenTopUp: () => void;
-  onConfirm: (selectedMethod: string) => Promise<void> | void;
+  onConfirm: (selectedMethod: string, paymentCurrency?: string) => Promise<void> | void;
 }
 
 export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
@@ -85,6 +85,26 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
 
   const isBalanceSelected = activeMethod === "balance";
 
+  const effectivePaymentCurrency = useMemo(() => {
+    if (isBalanceSelected || !selectedProvider) return currency;
+    const provCurrencies = [
+      selectedProvider.currency,
+      ...(selectedProvider.available_currencies || selectedProvider.currencies || []),
+    ]
+      .filter(Boolean)
+      .map((c) => c.toUpperCase());
+    if (provCurrencies.includes(currency.toUpperCase())) {
+      return currency.toUpperCase();
+    }
+    return selectedProvider.currency ? selectedProvider.currency.toUpperCase() : currency.toUpperCase();
+  }, [isBalanceSelected, selectedProvider, currency]);
+
+  const isConverted = !isBalanceSelected && effectivePaymentCurrency !== currency.toUpperCase();
+  const rateToBase = useMemo(() => {
+    if (!isConverted || !selectedProvider) return 1;
+    return Number(selectedProvider.fx_rates?.[effectivePaymentCurrency] || 1);
+  }, [isConverted, selectedProvider, effectivePaymentCurrency]);
+
   const feeInfo = isBalanceSelected
     ? { hasFee: false, percent: 0 }
     : getProviderFeeInfo(selectedProvider);
@@ -103,6 +123,12 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
   const payableAmount = isBalanceSelected
     ? mainUsedOnBalance
     : netAfterPromo + feeAmount;
+
+  const convertedPayableAmount = useMemo(() => {
+    if (!isConverted || rateToBase <= 0) return payableAmount;
+    return Number((payableAmount / rateToBase).toFixed(2));
+  }, [isConverted, rateToBase, payableAmount]);
+
   const maxUsableBonus = Math.min(bonusBalance, netAfterPromo);
 
   const renderProviderIcon = (p: PaymentProvider, size: "md" | "sm" = "md") => {
@@ -387,6 +413,12 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
                 <span>+{formatCurrency(feeAmount, currency)}</span>
               </div>
             )}
+            {isConverted && (
+              <div className={clsx(styles.breakRow, styles.savingRow)}>
+                <span>К оплате в валюте шлюза ({effectivePaymentCurrency})</span>
+                <span>~{formatCurrency(convertedPayableAmount, effectivePaymentCurrency)}</span>
+              </div>
+            )}
           </div>
 
           <div className={styles.totalFooter}>
@@ -395,7 +427,9 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
                 {isBalanceSelected ? "С основного баланса" : "К оплате"}
               </span>
               <span className={styles.totalAmount}>
-                {formatCurrency(payableAmount, currency)}
+                {isConverted
+                  ? formatCurrency(convertedPayableAmount, effectivePaymentCurrency)
+                  : formatCurrency(payableAmount, currency)}
               </span>
             </div>
 
@@ -403,14 +437,16 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
               variant="gradient"
               size="lg"
               loading={isSubmitting}
-              onClick={() => onConfirm(activeMethod)}
+              onClick={() => onConfirm(activeMethod, effectivePaymentCurrency)}
               className={styles.confirmBtn}
             >
               {isBalanceSelected && bonusUsedOnBalance >= netAfterPromo
                 ? `Оплатить бонусами (${formatCurrency(bonusUsedOnBalance, currency)})`
                 : isBalanceSelected && bonusUsedOnBalance > 0
                   ? `Оплатить (${formatCurrency(payableAmount, currency)} + ${bonusUsedOnBalance.toFixed(0)} бон.)`
-                  : `Оплатить ${formatCurrency(payableAmount, currency)}`}
+                  : isConverted
+                    ? `Оплатить ${formatCurrency(convertedPayableAmount, effectivePaymentCurrency)}`
+                    : `Оплатить ${formatCurrency(payableAmount, currency)}`}
             </Button>
 
             <p className={clsx(styles.feeNote, !feeInfo.hasFee && styles.feeNoteFree)}>

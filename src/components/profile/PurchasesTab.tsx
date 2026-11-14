@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
@@ -42,6 +42,8 @@ const STATUS_META: Record<
   paid: { label: "Оплачен", variant: "success" },
   succeeded: { label: "Оплачен", variant: "success" },
   pending: { label: "Ожидает оплаты", variant: "warning" },
+  wait: { label: "В обработке", variant: "warning" },
+  refunded: { label: "Возврат", variant: "muted" },
   failed: { label: "Ошибка", variant: "danger" },
   cancelled: { label: "Отменён", variant: "muted" },
   expired: { label: "Истёк", variant: "muted" },
@@ -120,6 +122,22 @@ export const PurchasesTab: React.FC<PurchasesTabProps> = ({ defaultCurrency }) =
     if (isMobile) return mobileQuery.data?.items ?? [];
     return desktopBatches.flat();
   }, [isMobile, mobileQuery.data, desktopBatches]);
+
+  const hasPending = useMemo(() => {
+    return visiblePurchases.some((p) => p.status === "pending" || p.status === "wait");
+  }, [visiblePurchases]);
+
+  useEffect(() => {
+    if (!hasPending) return;
+    const interval = setInterval(() => {
+      if (isMobile) {
+        void mobileQuery.refetch();
+      } else {
+        void infiniteQuery.refetch();
+      }
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [hasPending, isMobile, mobileQuery, infiniteQuery]);
 
   const total = isMobile
     ? (mobileQuery.data?.total ?? visiblePurchases.length)

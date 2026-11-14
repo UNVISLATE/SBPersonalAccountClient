@@ -219,6 +219,8 @@ export const ProductDetailPage: React.FC = () => {
         res[c.code] = componentValues[c.code];
       } else if (c.default !== undefined) {
         res[c.code] = c.default;
+      } else if (c.type === "switch" || c.type === "toggle") {
+        res[c.code] = c.default ? 1 : 0;
       } else if (c.type === "select" && c.options?.length) {
         res[c.code] = String(c.options[0].value);
       } else {
@@ -262,6 +264,8 @@ export const ProductDetailPage: React.FC = () => {
         if (comp.type === "select") {
           const opt = comp.options?.find((o) => String(o.value) === String(val));
           total += Number(opt?.price_delta ?? 0);
+        } else if (comp.type === "switch" || comp.type === "toggle") {
+          total += val ? Number(comp.unit_price ?? 0) : 0;
         } else {
           total += Number(val ?? 0) * Number(comp.unit_price ?? 0);
         }
@@ -280,6 +284,14 @@ export const ProductDetailPage: React.FC = () => {
   ]);
 
   const finalPrice = Math.max(0, basePrice - discountAmount);
+
+  const resetPromoIfApplied = () => {
+    if (discountAmount > 0) {
+      setDiscountAmount(0);
+      setPromoSuccessMsg("");
+      toast.info("Параметры услуги изменены. Примените промокод повторно.");
+    }
+  };
   const userBalance = Number(user?.balance ?? 0);
   const bonusBalance = Number(user?.bonus_balance ?? 0);
   const totalBalance = userBalance + bonusBalance;
@@ -342,6 +354,14 @@ export const ProductDetailPage: React.FC = () => {
         toast.error(`Введите сумму от ${customMin} до ${customMax} ${currency}`);
         return false;
       }
+      if (customStep > 0) {
+        const diff = Math.abs(effectiveCustomAmount - customMin);
+        const remainder = diff % customStep;
+        if (remainder > 1e-6 && Math.abs(remainder - customStep) > 1e-6) {
+          toast.error(`Сумма должна быть кратна шагу ${customStep}`);
+          return false;
+        }
+      }
     }
 
     const validationErrs = validateOrderFormValues(pricingConfig, formValues);
@@ -359,7 +379,7 @@ export const ProductDetailPage: React.FC = () => {
     setCheckoutOpen(true);
   };
 
-  const executePurchase = async (selectedMethod: string) => {
+  const executePurchase = async (selectedMethod: string, paymentCurrency?: string) => {
     if (!validateCheckoutReady() || !service) return;
 
     const orderPayload = {
@@ -386,7 +406,7 @@ export const ProductDetailPage: React.FC = () => {
           id: number;
           service_id: number;
           status: string;
-          secret_key?: string;
+          public_data?: Record<string, unknown>;
         }>("/user/services/create", orderPayload);
 
         toast.success("Заказ успешно оплачен и выдан!");
@@ -395,8 +415,9 @@ export const ProductDetailPage: React.FC = () => {
         await qc.invalidateQueries({ queryKey: ["user-services"] });
         await qc.invalidateQueries({ queryKey: ["user-purchases"] });
 
-        if (res?.secret_key) {
-          toast.success(`Ваш ключ: ${res.secret_key}`, { duration: 10000 });
+        const issuedKey = res?.public_data?.key || res?.public_data?.product_key;
+        if (issuedKey && typeof issuedKey === "string") {
+          toast.success(`Ваш ключ: ${issuedKey}`, { duration: 10000 });
         }
         navigate("/profile");
       } else {
@@ -404,7 +425,7 @@ export const ProductDetailPage: React.FC = () => {
         const payment = await createInvoice({
           target: "service",
           provider: selectedMethod,
-          currency,
+          currency: paymentCurrency || currency,
           return_url: window.location.pathname,
           ...orderPayload,
         });
@@ -672,7 +693,10 @@ export const ProductDetailPage: React.FC = () => {
                         key={t.code}
                         type="button"
                         className={clsx(styles.tierCard, isSelected && styles.tierSelected)}
-                        onClick={() => setSelectedTier(t.code)}
+                        onClick={() => {
+                          setSelectedTier(t.code);
+                          resetPromoIfApplied();
+                        }}
                       >
                         <div className={styles.tierLeft}>
                           <span className={styles.radioDot}>
@@ -706,7 +730,10 @@ export const ProductDetailPage: React.FC = () => {
                     max={customMax}
                     step={customStep}
                     value={customAmountStr ?? String(effectiveCustomAmount)}
-                    onChange={(e) => setCustomAmountStr(e.target.value)}
+                    onChange={(e) => {
+                      setCustomAmountStr(e.target.value);
+                      resetPromoIfApplied();
+                    }}
                     hint={`Допустимо от ${formatCurrency(customMin, currency)} до ${formatCurrency(customMax, currency)}`}
                     rightSlot={<span className={styles.currencyTag}>{currency}</span>}
                   />
@@ -737,10 +764,74 @@ export const ProductDetailPage: React.FC = () => {
                           label={comp.name || comp.label || comp.code}
                           options={opts}
                           value={String(val)}
-                          onChange={(next) =>
-                            setComponentValues((prev) => ({ ...prev, [comp.code]: next }))
-                          }
+                          onChange={(next) => {
+                            setComponentValues((prev) => ({ ...prev, [comp.code]: next }));
+                            resetPromoIfApplied();
+                          }}
                         />
+                      );
+                    }
+
+                    if (comp.type === "switch" || comp.type === "toggle") {
+                      const isChecked = Boolean(Number(val));
+                      const unitPrice = Number(comp.unit_price ?? 0);
+                      return (
+                        <div
+                          key={comp.code}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "12px 14px",
+                            background: "rgba(255, 255, 255, 0.03)",
+                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                            borderRadius: "10px",
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: "13px", fontWeight: 500, color: "var(--color-text)" }}>
+                              {comp.name || comp.label || comp.code}
+                            </div>
+                            {unitPrice > 0 && (
+                              <div style={{ fontSize: "11px", color: "var(--color-text-secondary)", marginTop: "2px" }}>
+                                +{formatCurrency(unitPrice, currency)}
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={isChecked}
+                            onClick={() => {
+                              setComponentValues((prev) => ({ ...prev, [comp.code]: isChecked ? 0 : 1 }));
+                              resetPromoIfApplied();
+                            }}
+                            style={{
+                              width: "40px",
+                              height: "22px",
+                              borderRadius: "9999px",
+                              background: isChecked ? "var(--color-accent)" : "rgba(255, 255, 255, 0.16)",
+                              border: "none",
+                              position: "relative",
+                              cursor: "pointer",
+                              transition: "background 0.2s ease",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "16px",
+                                height: "16px",
+                                borderRadius: "50%",
+                                background: "#ffffff",
+                                position: "absolute",
+                                top: "3px",
+                                left: isChecked ? "21px" : "3px",
+                                transition: "left 0.2s ease",
+                              }}
+                            />
+                          </button>
+                        </div>
                       );
                     }
 
@@ -772,12 +863,13 @@ export const ProductDetailPage: React.FC = () => {
                           max={max}
                           step={step}
                           value={numVal}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             setComponentValues((prev) => ({
                               ...prev,
                               [comp.code]: Number(e.target.value),
-                            }))
-                          }
+                            }));
+                            resetPromoIfApplied();
+                          }}
                           className={styles.rangeInput}
                         />
                       </div>

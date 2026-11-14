@@ -63,18 +63,14 @@ export const router = createBrowserRouter([
     ),
   },
 
-  // Protected App Layout (entire personal cabinet behind authorization)
+  // App Layout (Catalog is public for guests and users, Profile is protected)
   {
     path: "/",
-    element: (
-      <ProtectedRoute>
-        <AppLayout />
-      </ProtectedRoute>
-    ),
+    element: <AppLayout />,
     children: [
       {
         index: true,
-        element: <Navigate to="/profile" replace />,
+        element: <Navigate to="/catalog" replace />,
       },
       {
         path: "catalog",
@@ -95,41 +91,51 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: (
-          <Suspense fallback={<PageLoader />}>
-            <ProfilePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "profile/services",
         element: (
-          <Suspense fallback={<PageLoader />}>
-            <ProfilePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "profile/services/:serviceOrderId",
         element: (
-          <Suspense fallback={<PageLoader />}>
-            <ProfilePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "profile/payments",
         element: (
-          <Suspense fallback={<PageLoader />}>
-            <ProfilePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "profile/referral",
         element: (
-          <Suspense fallback={<PageLoader />}>
-            <ProfilePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {

@@ -216,12 +216,42 @@ export function validateOrderFormValues(
     const raw = values[f.id];
     const strVal = raw === undefined || raw === null ? "" : String(raw).trim();
 
-    if (f.required && !strVal) {
+    if (f.type === "toggle" || f.type === "checkbox") {
+      if (f.required && raw !== true) {
+        errors[f.id] = f.regex_error || `Необходимо включить «${f.label || f.id}»`;
+        continue;
+      }
+    } else if (f.required && !strVal) {
       errors[f.id] = `Заполните поле «${f.label || f.id}»`;
       continue;
     }
 
     if (strVal) {
+      if (f.type === "number" || f.type === "range") {
+        const numVal = Number(raw);
+        if (Number.isNaN(numVal)) {
+          errors[f.id] = "Введите число";
+          continue;
+        }
+        if (f.min !== undefined && numVal < Number(f.min)) {
+          errors[f.id] = `Минимальное значение: ${f.min}`;
+          continue;
+        }
+        if (f.max !== undefined && numVal > Number(f.max)) {
+          errors[f.id] = `Максимальное значение: ${f.max}`;
+          continue;
+        }
+        if (f.step !== undefined) {
+          const stepNum = Number(f.step);
+          const minBase = f.min !== undefined ? Number(f.min) : 0;
+          const diff = Math.abs(numVal - minBase);
+          const rem = diff % stepNum;
+          if (rem > 1e-6 && Math.abs(rem - stepNum) > 1e-6) {
+            errors[f.id] = `Значение должно быть кратно ${f.step}`;
+            continue;
+          }
+        }
+      }
       if (f.min_length !== undefined && strVal.length < f.min_length) {
         errors[f.id] = `Минимум ${f.min_length} символов`;
         continue;
@@ -755,10 +785,14 @@ export const SbuiOrderForm: React.FC<SbuiOrderFormProps> = ({
               onFormChange={onChange}
               errors={errors}
             />
-            {fieldType === "select" && err && <p className={styles.errorText}>{err}</p>}
-            {fieldType === "select" && !err && field.description && (
-              <p className={styles.hintText}>{field.description}</p>
-            )}
+            {(fieldType === "select" ||
+              fieldType === "toggle" ||
+              fieldType === "checkbox" ||
+              fieldType === "datetime") &&
+              err && <p className={styles.errorText}>{err}</p>}
+            {(fieldType === "select" || fieldType === "datetime") &&
+              !err &&
+              field.description && <p className={styles.hintText}>{field.description}</p>}
           </div>
         );
       })}

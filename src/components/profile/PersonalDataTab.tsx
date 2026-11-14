@@ -254,7 +254,12 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
   const effectiveEmailOpen = emailOpen || wantsEmailFromQuery;
   const effectiveNewEmail = newEmailDraft ?? (user.email || "");
   const effectiveTwoFaDisableOpen =
-    twoFaDisableOpen || (wants2FaFromQuery && !twoFaLoading && Boolean(twoFaStatus?.enabled));
+    twoFaDisableOpen ||
+    (wants2FaFromQuery &&
+      !twoFaLoading &&
+      Boolean(twoFaStatus?.enabled) &&
+      recoveryCodes === null &&
+      !twoFaSetupOpen);
 
   const handleConfirm2FA = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,6 +271,7 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
       setEnabling2Fa(true);
       const res = await enable2fa(twoFaCode.trim());
       setRecoveryCodes(res.recovery_codes || []);
+      clearModalQueryParam();
       toast.success("Двухфакторная защита активирована!");
       refetch2FA();
       onUserUpdated();

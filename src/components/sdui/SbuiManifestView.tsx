@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Dialog } from "@unvislate/sbui-sdk/components/dialog";
 import type { UserService } from "@/api/types";
 import { formatDate } from "@/lib/format";
 import {
@@ -42,6 +43,8 @@ function interpolateNode(
     "url",
     "label",
     "header",
+    "footer",
+    "logo",
     "copy_value",
     "placeholder",
     "title",
@@ -58,6 +61,30 @@ function interpolateNode(
     );
   }
   return clone as unknown as ExtendedSchemaNode;
+}
+
+function findDialogNode(
+  node: ExtendedSchemaNode,
+  dialogId: string
+): (ExtendedSchemaNode & { title?: string; description?: string; children?: ExtendedSchemaNode[] }) | null {
+  const obj = node as unknown as {
+    type?: string;
+    dialogId?: string;
+    id?: string;
+    title?: string;
+    description?: string;
+    children?: ExtendedSchemaNode[];
+  };
+  if (obj && typeof obj === "object" && obj.type === "dialog" && (obj.dialogId === dialogId || obj.id === dialogId)) {
+    return node as unknown as ExtendedSchemaNode & { title?: string; description?: string; children?: ExtendedSchemaNode[] };
+  }
+  if (Array.isArray(obj.children)) {
+    for (const child of obj.children) {
+      const found = findDialogNode(child, dialogId);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 export function extractServiceViewSchema(
@@ -118,6 +145,11 @@ export const SbuiManifestView: React.FC<SbuiManifestViewProps> = ({
   onOpenInstruction,
 }) => {
   const [formState, setFormState] = useState<Record<string, unknown>>({});
+  const [activeDialogNode, setActiveDialogNode] = useState<{
+    title?: string;
+    description?: string;
+    children?: ExtendedSchemaNode[];
+  } | null>(null);
 
   const templateContext = useMemo<Record<string, unknown>>(() => {
     const pub = (service.public_data || {}) as Record<string, unknown>;
@@ -171,8 +203,25 @@ export const SbuiManifestView: React.FC<SbuiManifestViewProps> = ({
       return;
     }
 
-    if (action === "instruction" || action === "markdown" || action === "dialog_open") {
+    if (action === "instruction" || action === "markdown") {
       onOpenInstruction?.();
+      return;
+    }
+
+    if (action === "dialog_open") {
+      if (payload?.dialogId) {
+        if (payload.dialogId === "instruction" || payload.dialogId === "instruction_md") {
+          onOpenInstruction?.();
+          return;
+        }
+        const found = findDialogNode(resolvedSchema, payload.dialogId);
+        if (found) {
+          setActiveDialogNode(found);
+          return;
+        }
+      }
+      onOpenInstruction?.();
+      return;
     }
   };
 
@@ -186,6 +235,28 @@ export const SbuiManifestView: React.FC<SbuiManifestViewProps> = ({
         }
         onAction={handleAction}
       />
+
+      {activeDialogNode && (
+        <Dialog
+          open={true}
+          onClose={() => setActiveDialogNode(null)}
+          title={activeDialogNode.title || "Информация"}
+          description={activeDialogNode.description}
+        >
+          {Array.isArray(activeDialogNode.children) &&
+            activeDialogNode.children.map((child, idx) => (
+              <ClientSchemaNode
+                key={(child as unknown as { id?: string }).id || idx}
+                node={child}
+                formData={formState}
+                onFormChange={(field, val) =>
+                  setFormState((prev) => ({ ...prev, [field]: val }))
+                }
+                onAction={handleAction}
+              />
+            ))}
+        </Dialog>
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
+import { useQueryClient } from "@tanstack/react-query"
 import { Header } from "./Header/Header"
 import { TopUpModal } from "@/components/modals/TopUpModal"
 import { PromoModal } from "@/components/modals/PromoModal"
@@ -24,6 +25,7 @@ export const useClientLayout = () => useContext(ClientLayoutContext)
 export const AppLayout: React.FC = () => {
   const [topUpOpen, setTopUpOpen] = useState(false)
   const [promoOpen, setPromoOpen] = useState(false)
+  const qc = useQueryClient()
   const { refreshUser } = useAuth()
   const { branding } = useBranding()
   const location = useLocation()
@@ -31,6 +33,8 @@ export const AppLayout: React.FC = () => {
 
   const handleRefresh = () => {
     refreshUser()
+    void qc.invalidateQueries({ queryKey: ["user-services"] })
+    void qc.invalidateQueries({ queryKey: ["user-purchases"] })
   }
 
   return (

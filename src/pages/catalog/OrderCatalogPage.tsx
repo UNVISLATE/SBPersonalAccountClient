@@ -31,13 +31,21 @@ export const OrderCatalogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { branding } = useBranding();
   const urlCatId = searchParams.get("cat");
+  const selectedCatId: number | "all" = useMemo(() => {
+    if (!urlCatId) return "all";
+    const n = Number(urlCatId);
+    return Number.isFinite(n) && n > 0 ? n : "all";
+  }, [urlCatId]);
 
-  const [selectedCatId, setSelectedCatId] = useState<number | "all">(
-    urlCatId ? Number(urlCatId) : "all"
-  );
   const [selectedSubCatId, setSelectedSubCatId] = useState<number | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("recommended");
+
+  const serverSort = useMemo(() => {
+    if (sortBy === "popularity") return "popular";
+    if (sortBy === "price_asc" || sortBy === "price_desc" || sortBy === "newest") return sortBy;
+    return undefined;
+  }, [sortBy]);
 
   const { data: categories = [], isLoading: isLoadingCats } = useQuery({
     queryKey: ["catalog-categories"],
@@ -74,12 +82,20 @@ export const OrderCatalogPage: React.FC = () => {
     isFetchingNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["catalog-services", "infinite", backendCatalogId ?? "all"],
+    queryKey: [
+      "catalog-services",
+      "infinite",
+      backendCatalogId ?? "all",
+      searchQuery.trim(),
+      serverSort ?? "default",
+    ],
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       try {
         return await getServices({
           catalog_id: backendCatalogId,
+          q: searchQuery.trim() || undefined,
+          sort: serverSort,
           limit: CATALOG_BATCH_SIZE,
           offset: pageParam,
         });
@@ -173,14 +189,19 @@ export const OrderCatalogPage: React.FC = () => {
   }, [services, selectedCatId, selectedSubCatId, subCategories, searchQuery, sortBy]);
 
   const handleSelectRoot = (id: number | "all") => {
-    setSelectedCatId(id);
     setSelectedSubCatId("all");
-    if (id === "all") {
-      searchParams.delete("cat");
-      setSearchParams(searchParams);
-    } else {
-      setSearchParams({ cat: String(id) });
-    }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (id === "all") {
+          next.delete("cat");
+        } else {
+          next.set("cat", String(id));
+        }
+        return next;
+      },
+      { replace: true }
+    );
   };
 
   const isLoading = isLoadingCats || isLoadingServices;

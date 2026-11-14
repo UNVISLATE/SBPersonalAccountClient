@@ -5,7 +5,10 @@ import {
   useInfiniteQuery,
   useQueries,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { api, ApiError } from "@/api/client";
 import { AnimatePresence, motion } from "motion/react";
 import { getService as getCatalogService } from "@/api/endpoints/catalog";
 import { getServices as getUserServices } from "@/api/endpoints/user";
@@ -38,6 +41,9 @@ import {
   Search,
   X,
   Loader2,
+  RefreshCw,
+  Snowflake,
+  Play,
 } from "lucide-react";
 import styles from "./ServicesTab.module.scss";
 
@@ -341,6 +347,23 @@ export const ServicesTab: React.FC = () => {
     setSearchParams(next, { replace: true });
   };
 
+  const qc = useQueryClient();
+  const [runningAction, setRunningAction] = useState<string | null>(null);
+
+  const handleServiceAction = async (svcId: number, action: string) => {
+    try {
+      setRunningAction(`${svcId}-${action}`);
+      await api.post(`/user/services/${svcId}/action`, { action });
+      toast.success(`Действие «${action}» успешно выполнено!`);
+      await qc.invalidateQueries({ queryKey: ["user-services"] });
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.detail : "Не удалось выполнить действие";
+      toast.error(msg);
+    } finally {
+      setRunningAction(null);
+    }
+  };
+
   const toggleReveal = (id: number) =>
     setRevealedIds((prev) => ({ ...prev, [id]: !prev[id] }));
 
@@ -389,7 +412,8 @@ export const ServicesTab: React.FC = () => {
       variant: "muted" as const,
     };
     const title = resolveServiceTitle(svc);
-    const hasActionsBar = Boolean(viewSchema || instruction);
+    const canManage = svc.status === "active" || svc.status === "frozen";
+    const hasActionsBar = Boolean(viewSchema || instruction || canManage);
 
     return (
       <div key={svc.id} className={styles.serviceCard}>
@@ -476,6 +500,48 @@ export const ServicesTab: React.FC = () => {
               >
                 <BookOpen size={14} />
                 <span>Инструкция по использованию</span>
+              </button>
+            )}
+
+            {svc.status === "active" && (
+              <button
+                type="button"
+                className={styles.actionPillBtn}
+                disabled={Boolean(runningAction)}
+                onClick={() => handleServiceAction(svc.id, "renew")}
+                title="Продлить услугу"
+              >
+                <RefreshCw
+                  size={13}
+                  className={runningAction === `${svc.id}-renew` ? "animate-spin" : undefined}
+                />
+                <span>Продлить</span>
+              </button>
+            )}
+
+            {svc.status === "active" && (
+              <button
+                type="button"
+                className={styles.actionPillBtn}
+                disabled={Boolean(runningAction)}
+                onClick={() => handleServiceAction(svc.id, "freeze")}
+                title="Приостановить действие услуги"
+              >
+                <Snowflake size={13} />
+                <span>Заморозить</span>
+              </button>
+            )}
+
+            {svc.status === "frozen" && (
+              <button
+                type="button"
+                className={styles.actionPillBtn}
+                disabled={Boolean(runningAction)}
+                onClick={() => handleServiceAction(svc.id, "renew")}
+                title="Возобновить действие услуги"
+              >
+                <Play size={13} />
+                <span>Разморозить</span>
               </button>
             )}
           </div>

@@ -30,9 +30,3 @@ export const createInvoice = (body: CreateInvoiceBody) =>
     "/user/purchases/create",
     body
   )
-
-export const applyPromo = (code: string, service_id?: number) =>
-  api.post<{ discount_amount?: number; new_price?: number; message?: string }>(
-    "/user/purchases/promo",
-    { code, service_id }
-  )

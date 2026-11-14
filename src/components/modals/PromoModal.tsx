@@ -28,12 +28,19 @@ export const PromoModal: React.FC<PromoModalProps> = ({ isOpen, onClose, onSucce
     try {
       setSubmitting(true);
       const res = await api.post<{
-        status?: string;
-        message?: string;
-        bonus_amount?: number;
+        kind: string;
+        message: string;
+        bonus_added?: number | null;
+        order_id?: number | null;
       }>("/promocodes/redeem", { code: cleanCode });
 
-      toast.success(res.message || "Промокод успешно активирован!");
+      if (res.bonus_added) {
+        toast.success(res.message || `Начислено бонусов: ${res.bonus_added}`);
+      } else if (res.order_id) {
+        toast.success(res.message || `Услуга успешно выдана (заказ #${res.order_id})!`);
+      } else {
+        toast.success(res.message || "Промокод успешно активирован!");
+      }
       setCode("");
       onSuccess?.();
       onClose();
