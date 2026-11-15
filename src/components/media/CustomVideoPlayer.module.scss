@@ -22,6 +22,16 @@
   display: block;
 }
 
+.previewBackdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: 1;
+  transition: background-image 0.5s ease-in-out;
+}
+
 .centerPlayBtn {
   position: absolute;
   top: 50%;

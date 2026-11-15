@@ -7,6 +7,7 @@ import styles from "./CustomVideoPlayer.module.scss";
 export interface CustomVideoPlayerProps {
   src: string;
   poster?: string;
+  previews?: string[];
   autoPlay?: boolean;
   loop?: boolean;
   className?: string;
@@ -16,6 +17,7 @@ export interface CustomVideoPlayerProps {
 export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
   src,
   poster,
+  previews,
   autoPlay = false,
   loop = false,
   className,
@@ -35,6 +37,23 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isDraggingScrubber, setIsDraggingScrubber] = useState(false);
+  const [activePreviewIndex, setActivePreviewIndex] = useState(0);
+
+  // Smoothly cycle poster previews when paused, before start or upon video completion
+  useEffect(() => {
+    if (isPlaying || !previews || previews.length <= 1) {
+      return;
+    }
+    const interval = setInterval(() => {
+      setActivePreviewIndex((prev) => (prev + 1) % previews.length);
+    }, 1200);
+    return () => clearInterval(interval);
+  }, [isPlaying, previews]);
+
+  const activePoster =
+    !isPlaying && previews && previews.length > 0
+      ? previews[activePreviewIndex]
+      : poster;
 
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -183,7 +202,7 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
       <video
         ref={videoRef}
         src={src}
-        poster={poster}
+        poster={activePoster}
         autoPlay={autoPlay}
         loop={loop}
         playsInline
@@ -195,6 +214,15 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
       />
+
+      {/* Smoothly cross-fading preview backdrop when paused/ended */}
+      {!isPlaying && activePoster && (
+        <div
+          className={styles.previewBackdrop}
+          style={{ backgroundImage: `url(${activePoster})` }}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Animated Center Play/Pause Circle */}
       <AnimatePresence>
@@ -297,14 +325,40 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
             </motion.button>
 
             <div className={styles.volumeGroup}>
-              <button
+              <motion.button
                 type="button"
                 className={styles.controlBtn}
                 onClick={toggleMute}
+                whileHover={{ scale: 1.12 }}
+                whileTap={{ scale: 0.88 }}
                 aria-label={isMuted ? "Включить звук" : "Выключить звук"}
               >
-                {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              </button>
+                <AnimatePresence mode="wait" initial={false}>
+                  {isMuted || volume === 0 ? (
+                    <motion.span
+                      key="muted-icon"
+                      className={styles.iconAnimSpan}
+                      initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 0.6, rotate: 20 }}
+                      transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <VolumeX size={18} />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="volume-icon"
+                      className={styles.iconAnimSpan}
+                      initial={{ opacity: 0, scale: 0.6, rotate: 20 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 0.6, rotate: -20 }}
+                      transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <Volume2 size={18} />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
               <input
                 type="range"
                 min="0"

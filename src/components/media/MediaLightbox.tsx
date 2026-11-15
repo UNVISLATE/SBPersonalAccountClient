@@ -10,6 +10,8 @@ export interface MediaItem {
   url: string;
   type?: "image" | "video";
   name?: string;
+  poster?: string;
+  previews?: { url: string }[] | string[];
 }
 
 export interface MediaLightboxProps {
@@ -172,7 +174,14 @@ export const MediaLightbox: React.FC<MediaLightboxProps> = ({
                   >
                     {isVideo ? (
                       <div className={styles.videoWrapper}>
-                        <CustomVideoPlayer src={currentItem.url} autoPlay />
+                        <CustomVideoPlayer
+                          src={currentItem.url}
+                          poster={currentItem.poster}
+                          previews={currentItem.previews?.map((p) =>
+                            typeof p === "string" ? p : p.url
+                          )}
+                          autoPlay={false}
+                        />
                       </div>
                     ) : (
                       <img

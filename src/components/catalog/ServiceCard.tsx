@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import type { CatalogService } from "@/api/types";
 import { formatCurrency } from "@/lib/format";
@@ -17,22 +17,76 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   categoryName,
   defaultCurrency,
 }) => {
-  const cardMedia =
-    service.attachments?.find((a) => a.tag === "card") ||
-    service.attachments?.find((a) => a.tag === "banner") ||
-    service.attachments?.find((a) => a.kind === "image") ||
-    service.attachments?.[0];
+  // Strict tag check: ONLY card tag applies to the card!
+  const cardMedia = service.attachments?.find((a) => a.tag === "card") || null;
 
-  const artworkUrl = cardMedia?.url || service.image_url || null;
+  // Ordered sequence of preview frames
+  const previewFrames = useMemo(() => {
+    if (!cardMedia) return [];
+    if (cardMedia.previews && cardMedia.previews.length > 0) {
+      return cardMedia.previews.map((p) => p.url);
+    }
+    if (cardMedia.thumb?.url) {
+      return [cardMedia.thumb.url];
+    }
+    if (cardMedia.kind === "video") {
+      return [`/api/media/${cardMedia.token}.thumb`];
+    }
+    if (cardMedia.url) {
+      return [cardMedia.url];
+    }
+    return [];
+  }, [cardMedia]);
+
+  const defaultArtUrl = previewFrames[0] || service.image_url || null;
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  // Smoothly cycle through preview frames on hover
+  useEffect(() => {
+    if (!isHovered || previewFrames.length <= 1) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setHoverIndex((prev) => ((prev ?? 0) + 1) % previewFrames.length);
+    }, 750);
+
+    return () => clearInterval(interval);
+  }, [isHovered, previewFrames.length]);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    if (previewFrames.length > 1) {
+      setHoverIndex(0);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setHoverIndex(null);
+  };
+
+  const currentArtUrl =
+    hoverIndex !== null && previewFrames[hoverIndex]
+      ? previewFrames[hoverIndex]
+      : defaultArtUrl;
+
   const currency = service.currency || defaultCurrency;
 
   return (
-    <Link to={`/catalog/${service.id}`} className={styles.card} data-reveal-item>
+    <Link
+      to={`/catalog/${service.id}`}
+      className={styles.card}
+      data-reveal-item
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Artwork / Background Layer */}
-      {artworkUrl ? (
+      {currentArtUrl ? (
         <div
           className={styles.artwork}
-          style={{ backgroundImage: `url(${artworkUrl})` }}
+          style={{ backgroundImage: `url(${currentArtUrl})` }}
           aria-hidden="true"
         />
       ) : (

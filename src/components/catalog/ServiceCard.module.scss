@@ -48,7 +48,7 @@
   inset: 0;
   background-size: cover;
   background-position: center;
-  transition: transform 0.55s $ease-out-expo;
+  transition: transform 0.55s $ease-out-expo, background-image 0.4s ease-in-out;
   z-index: 0;
 }
 

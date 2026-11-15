@@ -166,15 +166,14 @@ export const ProductDetailPage: React.FC = () => {
     [service]
   );
 
+  // Strict placement: ONLY tag === 'banner' can be the hero banner!
   const bannerAttachment =
-    attachments.find((a) => a.tag === "banner") ||
-    attachments.find((a) => a.kind === "image");
+    attachments.find((a) => a.tag === "banner") || null;
   const bannerUrl = bannerAttachment?.url || service?.image_url || "";
 
+  // Strict placement: ONLY tag === 'gallery' appears in the gallery slider!
   const galleryAttachments = useMemo(() => {
-    const tagged = attachments.filter((a) => a.tag === "gallery");
-    if (tagged.length > 0) return tagged;
-    return attachments.filter((a) => a.tag !== "banner" && a.tag !== "card");
+    return attachments.filter((a) => a.tag === "gallery");
   }, [attachments]);
 
   const pricingConfig = useMemo(
@@ -1006,6 +1005,10 @@ export const ProductDetailPage: React.FC = () => {
           id: a.id,
           url: a.url,
           type: (a.kind === "video" ? "video" : "image") as "image" | "video",
+          poster:
+            a.thumb?.url ||
+            (a.kind === "video" ? `/api/media/${a.token}.thumb` : undefined),
+          previews: a.previews?.map((p) => p.url),
         }))}
         currentIndex={activeMediaIndex}
         onNavigate={(idx) => setActiveMediaIndex(idx)}

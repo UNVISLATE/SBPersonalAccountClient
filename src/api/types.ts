@@ -163,6 +163,9 @@ export interface ServiceAttachment {
   mime?: string | null
   status: string
   url: string
+  name?: string | null
+  thumb?: { url: string; mime?: string | null; size?: number | null } | null
+  previews?: { url: string; mime?: string | null; size?: number | null }[]
 }
 
 export interface UserReferral {
