@@ -1,9 +1,5 @@
 import { buildApiUrl } from "@/config/env"
 
-// ==========================================
-// HTTP API CLIENT (COOKIE AUTH + SINGLE-FLIGHT REFRESH)
-// ==========================================
-
 export const AUTH_UNAUTHORIZED_EVENT = "sb:auth:unauthorized"
 
 const LEGACY_TOKEN_KEYS = ["sb_client_token", "sb_client_refresh_token"]
@@ -118,13 +114,7 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
   })
 
   if (res.status === 401 && !_retried) {
-    const isAuthEndpoint =
-      endpoint.includes("/auth/login") ||
-      endpoint.includes("/auth/register") ||
-      endpoint.includes("/auth/refresh") ||
-      endpoint.includes("/auth/logout") ||
-      endpoint.includes("/auth/claim-guest-account") ||
-      endpoint.includes("/branding")
+    const isAuthEndpoint = endpoint.includes("/auth/") || endpoint.includes("/branding")
 
     if (!isAuthEndpoint) {
       const refreshed = await refreshAccessToken()
@@ -141,7 +131,17 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     let detail = `Request failed (${res.status})`
     try {
       const errJson = await res.json()
-      detail = errJson.detail || errJson.message || detail
+      if (typeof errJson.detail === "string") {
+        detail = errJson.detail
+      } else if (Array.isArray(errJson.detail)) {
+        detail = errJson.detail
+          .map((item: any) => item?.msg || JSON.stringify(item))
+          .join("; ")
+      } else if (errJson.detail && typeof errJson.detail === "object") {
+        detail = JSON.stringify(errJson.detail)
+      } else if (typeof errJson.message === "string") {
+        detail = errJson.message
+      }
     } catch {
       // Body is not JSON
     }

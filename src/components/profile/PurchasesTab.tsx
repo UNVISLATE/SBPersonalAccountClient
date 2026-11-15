@@ -206,7 +206,7 @@ export const PurchasesTab: React.FC<PurchasesTabProps> = ({ defaultCurrency }) =
               <a
                 href={payHref}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className={styles.payLink}
                 title="Перейти к оплате"
               >

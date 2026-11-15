@@ -75,7 +75,7 @@ export const AppLayout: React.FC = () => {
                 <a
                   href={branding.telegram_channel}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={styles.supportLink}
                 >
                   Telegram канал
@@ -85,7 +85,7 @@ export const AppLayout: React.FC = () => {
                 <a
                   href={branding.telegram_chat}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={styles.supportLink}
                 >
                   Чат
@@ -95,7 +95,7 @@ export const AppLayout: React.FC = () => {
                 <a
                   href={branding.discord_link}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={styles.supportLink}
                 >
                   Discord
@@ -105,7 +105,7 @@ export const AppLayout: React.FC = () => {
                 <a
                   href={branding.support_link}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={styles.supportLink}
                 >
                   Поддержка

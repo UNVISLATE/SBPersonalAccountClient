@@ -100,7 +100,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
   const handleOAuthStart = async (providerSlug: string) => {
     try {
       const res = await api.get<{ authorize_url?: string }>(`/oauth/${providerSlug}`);
-      if (res?.authorize_url) {
+      if (res?.authorize_url && /^https?:\/\//i.test(res.authorize_url)) {
         window.location.assign(res.authorize_url);
       }
     } catch (err) {
@@ -113,7 +113,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ── 1. Password Reset Flow ──────────────────────────────────
     if (mode === "reset") {
       if (!resetSent) {
         if (!resetEmail.trim()) {
@@ -163,10 +162,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
       return;
     }
 
-    // ── 2. Guest Claim Flow ─────────────────────────────────────
     if (mode === "claim") {
       if (!claimToken) {
-        // Step 1: Request claim code to email
         if (!claimEmail.trim()) {
           toast.error("Введите email гостевого аккаунта");
           return;
@@ -188,7 +185,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
           setSubmitting(false);
         }
       } else {
-        // Step 2: Verify OTP code and set new password
         if (!claimCode.trim() || !claimPassword) {
           toast.error("Введите код из письма и новый пароль");
           return;
@@ -213,7 +209,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
       return;
     }
 
-    // ── 3. Login / Register Flow ────────────────────────────────
     if (!loginValue.trim()) {
       toast.error("Введите логин");
       return;

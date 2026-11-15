@@ -16,6 +16,7 @@ dist-ssr
 .env.*
 !.env.example
 .playwright-mcp/
+.pytest_cache/
 
 # Editor directories and files
 .vscode/*

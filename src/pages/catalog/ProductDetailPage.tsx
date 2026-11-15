@@ -103,23 +103,19 @@ export const ProductDetailPage: React.FC = () => {
   const [sliderOffset, setSliderOffset] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // Pricing selections
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [customAmountStr, setCustomAmountStr] = useState<string | null>(null);
   const [componentValues, setComponentValues] = useState<Record<string, string | number>>({});
 
-  // SDUI Order form values + validation errors
   const [formOverrides, setFormOverrides] = useState<Record<string, unknown>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Promo code
   const [promoExpanded, setPromoExpanded] = useState(false);
   const [promocode, setPromocode] = useState("");
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [promoSuccessMsg, setPromoSuccessMsg] = useState("");
   const [checkingPromo, setCheckingPromo] = useState(false);
 
-  // Checkout modal & terms
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -166,12 +162,10 @@ export const ProductDetailPage: React.FC = () => {
     [service]
   );
 
-  // Strict placement: ONLY tag === 'banner' can be the hero banner!
   const bannerAttachment =
     attachments.find((a) => a.tag === "banner") || null;
   const bannerUrl = bannerAttachment?.url || service?.image_url || "";
 
-  // Strict placement: ONLY tag === 'gallery' appears in the gallery slider!
   const galleryAttachments = useMemo(() => {
     return attachments.filter((a) => a.tag === "gallery");
   }, [attachments]);
@@ -184,7 +178,6 @@ export const ProductDetailPage: React.FC = () => {
   const priceType = service?.price_type || "fixed";
   const currency = service?.currency || branding.currency || "RUB";
 
-  // 1. Tiered plans (flat or grouped subtiers)
   const tiers = useMemo<FlatTier[]>(() => {
     if (priceType === "tiered" && Array.isArray(pricingConfig.tiers)) {
       return flattenTiers(pricingConfig.tiers as ServiceTier[]);
@@ -425,15 +418,17 @@ export const ProductDetailPage: React.FC = () => {
           target: "service",
           provider: selectedMethod,
           currency: paymentCurrency || currency,
-          return_url: window.location.pathname,
+          return_url: window.location.origin + window.location.pathname,
           ...orderPayload,
         });
 
         setCheckoutOpen(false);
         const redirectUrl = payment.payment_url || payment.pay_url;
-        if (redirectUrl) {
+        if (redirectUrl && /^https?:\/\//i.test(redirectUrl)) {
           toast.success("Переход на страницу оплаты...");
           window.location.href = redirectUrl;
+        } else if (redirectUrl) {
+          toast.error("Некорректная ссылка на оплату");
         } else {
           toast.success("Счёт создан, проверьте статус в личном кабинете");
           navigate("/profile");
@@ -877,7 +872,6 @@ export const ProductDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Pricing Mode 4: Fixed */}
               {priceType === "fixed" && (
                 <div className={clsx(styles.tierCard, styles.tierSelected, styles.tierStatic)}>
                   <div className={styles.tierLeft}>
@@ -892,7 +886,6 @@ export const ProductDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* SDUI Dynamic Order Form (via @unvislate/sbui-sdk with external overrides) */}
               <SbuiOrderForm
                 pricingConfig={pricingConfig}
                 values={formValues}
@@ -900,7 +893,6 @@ export const ProductDetailPage: React.FC = () => {
                 errors={formErrors}
               />
 
-              {/* Promo Code */}
               <div className={styles.promoContainer}>
                 {!promoExpanded ? (
                   <div className={styles.promoTriggerRow}>

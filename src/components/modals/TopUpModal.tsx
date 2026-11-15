@@ -216,13 +216,15 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, onSucce
         currency: activeCurrency,
         amount_in_payment_currency:
           activeCurrency.toUpperCase() !== brandCurrency.toUpperCase(),
-        return_url: window.location.pathname,
+        return_url: window.location.origin + window.location.pathname,
       });
 
       const redirectUrl = res?.payment_url || res?.pay_url;
-      if (redirectUrl) {
+      if (redirectUrl && /^https?:\/\//i.test(redirectUrl)) {
         toast.success("Переход на страницу оплаты...");
         window.location.href = redirectUrl;
+      } else if (redirectUrl) {
+        toast.error("Некорректная ссылка на оплату");
       } else {
         toast.success("Счёт на оплату создан!");
         onSuccess?.();
