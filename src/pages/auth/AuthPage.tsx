@@ -28,6 +28,7 @@ import {
   ArrowRight,
   KeyRound,
   RotateCcw,
+  Info,
 } from "lucide-react";
 import styles from "./AuthPage.module.scss";
 
@@ -71,6 +72,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
 
   const { login, register, claimGuestAccount } = useAuth();
   const { branding } = useBranding();
+  const isRegistrationAllowed = branding.registration_enabled !== false;
+
+  React.useEffect(() => {
+    if (!isRegistrationAllowed && mode === "register") {
+      setMode("login");
+      navigate("/login", { replace: true });
+      toast.info("Регистрация новых пользователей временно отключена");
+    }
+  }, [isRegistrationAllowed, mode, navigate]);
 
   const { data: oauthProviders = [] } = useQuery<OAuthProviderItem[]>({
     queryKey: ["auth-oauth-providers"],
@@ -217,6 +227,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
       toast.error("Введите пароль");
       return;
     }
+    if (mode === "register" && !isRegistrationAllowed) {
+      toast.error("Регистрация новых пользователей отключена");
+      return;
+    }
     if (mode === "register" && !emailValue.trim()) {
       toast.error("Введите Email для регистрации");
       return;
@@ -263,7 +277,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
 
   const tabItems = [
     { id: "login", label: "Авторизация" },
-    { id: "register", label: "Регистрация" },
+    ...(isRegistrationAllowed ? [{ id: "register", label: "Регистрация" }] : []),
   ];
 
   return (
@@ -337,7 +351,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
             </p>
           </div>
 
-          {mode !== "claim" && mode !== "reset" && (
+          {branding.login_notice && (
+            <div className={styles.loginNotice}>
+              <Info size={16} />
+              <div>{branding.login_notice}</div>
+            </div>
+          )}
+
+          {mode !== "claim" && mode !== "reset" && tabItems.length > 1 && (
             <div className={styles.tabsWrap}>
               <CapsuleTabs
                 items={tabItems}

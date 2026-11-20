@@ -10,10 +10,12 @@ export interface StoreBranding {
   mascot_url: string | null
   mascot_not_found_url: string | null
   catalog_banner_url: string | null
+  login_notice?: string | null
   theme?: Record<string, unknown>
   settings?: Record<string, unknown>
   currency: string
   version?: string
+  registration_enabled?: boolean
   support_link?: string
   telegram_channel?: string
   telegram_chat?: string
@@ -27,7 +29,9 @@ export const DEFAULT_BRANDING: StoreBranding = {
   mascot_url: "/unvi/mascot/HelloMascotUNVI.webp",
   mascot_not_found_url: "/unvi/mascot/NotFoundMascotUNVI.webp",
   catalog_banner_url: null,
+  login_notice: null,
   currency: "RUB",
+  registration_enabled: true,
   support_link: "https://t.me/support",
 }
 
@@ -56,10 +60,12 @@ interface BrandingApiResponse {
   mascot_url?: string | null
   mascot_not_found_url?: string | null
   catalog_banner_url?: string | null
+  login_notice?: string | null
   theme?: Record<string, unknown>
   settings?: Record<string, unknown>
   currency?: string
   version?: string
+  registration_enabled?: boolean
 }
 
 export function useBranding() {
@@ -78,10 +84,15 @@ export function useBranding() {
           mascot_not_found_url:
             resolveAssetUrl(res.mascot_not_found_url) || DEFAULT_BRANDING.mascot_not_found_url,
           catalog_banner_url: resolveAssetUrl(res.catalog_banner_url) || null,
+          login_notice: res.login_notice ?? null,
           theme: res.theme || {},
           settings: s,
           currency: res.currency || DEFAULT_BRANDING.currency,
           version: res.version,
+          registration_enabled:
+            res.registration_enabled !== undefined
+              ? res.registration_enabled
+              : DEFAULT_BRANDING.registration_enabled,
           support_link:
             (typeof s.support_link === "string" && s.support_link.trim()) ||
             DEFAULT_BRANDING.support_link,
