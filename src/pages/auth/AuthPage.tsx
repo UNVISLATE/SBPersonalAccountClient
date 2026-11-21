@@ -74,9 +74,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
   const { branding } = useBranding();
   const isRegistrationAllowed = branding.registration_enabled !== false;
 
+  if (!isRegistrationAllowed && mode === "register") {
+    setMode("login");
+  }
+
   React.useEffect(() => {
     if (!isRegistrationAllowed && mode === "register") {
-      setMode("login");
       navigate("/login", { replace: true });
       toast.info("Регистрация новых пользователей временно отключена");
     }

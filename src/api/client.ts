@@ -135,7 +135,11 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
         detail = errJson.detail
       } else if (Array.isArray(errJson.detail)) {
         detail = errJson.detail
-          .map((item: any) => item?.msg || JSON.stringify(item))
+          .map((item: unknown) =>
+            typeof item === "object" && item !== null && "msg" in item
+              ? String((item as { msg: unknown }).msg)
+              : JSON.stringify(item),
+          )
           .join("; ")
       } else if (errJson.detail && typeof errJson.detail === "object") {
         detail = JSON.stringify(errJson.detail)
