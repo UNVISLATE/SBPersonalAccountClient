@@ -188,6 +188,7 @@ export interface CatalogService {
   delivery?: "key" | "auto" | "manual" | string
   out_of_stock?: boolean
   is_recommended?: boolean
+  allow_promotions?: boolean
   is_active?: boolean
   orders_count?: number
   attachments?: ServiceAttachment[]

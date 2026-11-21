@@ -102,6 +102,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
     rawReturnUrl.startsWith("/") && !rawReturnUrl.startsWith("//")
       ? rawReturnUrl
       : "/profile";
+  const isOrderRedirect = returnUrl.includes("/profile/services");
 
   const handleModeChange = (nextId: string) => {
     const nextMode = nextId as "login" | "register";
@@ -349,10 +350,28 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
                     ? "Введите адрес электронной почты для получения кода сброса пароля"
                     : "Введите код подтверждения из письма и новый пароль"
                   : mode === "login"
-                    ? "Войдите в аккаунт для управления услугами и балансом"
-                    : "Создайте учетную запись для доступа к личному кабинету"}
+                    ? isOrderRedirect
+                      ? "Войдите в аккаунт, чтобы просмотреть выданную услугу или ключ по вашему заказу"
+                      : "Войдите в аккаунт для управления услугами и балансом"
+                    : isOrderRedirect
+                      ? "Зарегистрируйтесь, чтобы получить доступ к выданной услуге"
+                      : "Создайте учетную запись для доступа к личному кабинету"}
             </p>
           </div>
+
+          {isOrderRedirect && (
+            <div
+              className={styles.loginNotice}
+              style={{
+                background: "rgba(0, 144, 128, 0.1)",
+                borderColor: "rgba(0, 144, 128, 0.3)",
+                color: "var(--color-accent, #009080)",
+              }}
+            >
+              <KeyRound size={16} />
+              <div>Войдите в аккаунт для просмотра вашего заказа и выданного ключа</div>
+            </div>
+          )}
 
           {branding.login_notice && (
             <div className={styles.loginNotice}>

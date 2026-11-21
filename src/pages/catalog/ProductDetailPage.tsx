@@ -247,7 +247,13 @@ export const ProductDetailPage: React.FC = () => {
       return Number(active?.price ?? service.price ?? 0);
     }
     if (priceType === "custom") {
-      return Number.isFinite(effectiveCustomAmount) ? effectiveCustomAmount : 0;
+      if (!Number.isFinite(effectiveCustomAmount)) return 0;
+      const markupPercent = Number(pricingConfig.markup_percent ?? 0);
+      const markupFixed = Number(pricingConfig.markup_fixed ?? 0);
+      let markup = 0;
+      if (markupPercent > 0) markup += (effectiveCustomAmount * markupPercent) / 100;
+      if (markupFixed > 0) markup += markupFixed;
+      return Math.round((effectiveCustomAmount + markup) * 100) / 100;
     }
     if (priceType === "configurable") {
       let total = Number(service.price ?? 0);
@@ -271,9 +277,20 @@ export const ProductDetailPage: React.FC = () => {
     tiers,
     activeTierCode,
     effectiveCustomAmount,
+    pricingConfig,
     configComponents,
     effectiveComponents,
   ]);
+
+  const customMarkupAmount = useMemo(() => {
+    if (priceType !== "custom" || !Number.isFinite(effectiveCustomAmount)) return 0;
+    const markupPercent = Number(pricingConfig.markup_percent ?? 0);
+    const markupFixed = Number(pricingConfig.markup_fixed ?? 0);
+    let markup = 0;
+    if (markupPercent > 0) markup += (effectiveCustomAmount * markupPercent) / 100;
+    if (markupFixed > 0) markup += markupFixed;
+    return Math.round(markup * 100) / 100;
+  }, [priceType, effectiveCustomAmount, pricingConfig]);
 
   const finalPrice = Math.max(0, basePrice - discountAmount);
 
@@ -411,14 +428,14 @@ export const ProductDetailPage: React.FC = () => {
         if (issuedKey && typeof issuedKey === "string") {
           toast.success(`Ваш ключ: ${issuedKey}`, { duration: 10000 });
         }
-        navigate("/profile");
+        navigate(`/profile/services/${res.id}`);
       } else {
         // Note: For target="service", backend resolves authoritative price server-side (must NOT send amount)
         const payment = await createInvoice({
           target: "service",
           provider: selectedMethod,
           currency: paymentCurrency || currency,
-          return_url: window.location.origin + window.location.pathname,
+          return_url: window.location.origin + "/profile/services",
           ...orderPayload,
         });
 
@@ -718,7 +735,7 @@ export const ProductDetailPage: React.FC = () => {
               {priceType === "custom" && (
                 <div className={styles.customPriceBlock}>
                   <Input
-                    label="Сумма оплаты"
+                    label="Сумма зачисления"
                     type="number"
                     min={customMin}
                     max={customMax}
@@ -731,6 +748,49 @@ export const ProductDetailPage: React.FC = () => {
                     hint={`Допустимо от ${formatCurrency(customMin, currency)} до ${formatCurrency(customMax, currency)}`}
                     rightSlot={<span className={styles.currencyTag}>{currency}</span>}
                   />
+                  {customMarkupAmount > 0 && (
+                    <div
+                      style={{
+                        marginTop: 8,
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        background: "var(--color-surface, rgba(255,255,255,0.04))",
+                        fontSize: 12,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                        color: "var(--color-text-muted)",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span>Сумма к зачислению:</span>
+                        <span style={{ color: "var(--color-text)" }}>
+                          {formatCurrency(effectiveCustomAmount, currency)}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span>Комиссия сервиса:</span>
+                        <span style={{ color: "var(--color-text)" }}>
+                          +{formatCurrency(customMarkupAmount, currency)}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          fontWeight: 600,
+                          borderTop: "1px solid rgba(255,255,255,0.08)",
+                          paddingTop: 4,
+                          marginTop: 2,
+                        }}
+                      >
+                        <span>Итого к оплате:</span>
+                        <span style={{ color: "var(--color-accent, #009080)" }}>
+                          {formatCurrency(basePrice, currency)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -893,47 +953,63 @@ export const ProductDetailPage: React.FC = () => {
                 errors={formErrors}
               />
 
-              <div className={styles.promoContainer}>
-                {!promoExpanded ? (
-                  <div className={styles.promoTriggerRow}>
-                    <div className={styles.promoTextWrap}>
-                      <Tag size={14} className={styles.promoTagIcon} />
-                      <span>Есть промокод?</span>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.promoLinkBtn}
-                      onClick={() => setPromoExpanded(true)}
-                    >
-                      Ввести
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleApplyPromo} className={styles.promoForm}>
-                    <div className={styles.promoInputRow}>
-                      <Input
-                        type="text"
-                        value={promocode}
-                        onChange={(e) => setPromocode(e.target.value)}
-                        placeholder="Промокод..."
-                        autoFocus
-                      />
-                      <Button
-                        type="submit"
-                        variant="secondary"
-                        size="md"
-                        loading={checkingPromo}
-                        disabled={!promocode.trim()}
+              {service.allow_promotions === false ? (
+                <div
+                  className={styles.promoContainer}
+                  style={{
+                    padding: "10px 14px",
+                    fontSize: 12,
+                    color: "var(--color-text-muted)",
+                    border: "1px dashed var(--color-border, rgba(255,255,255,0.1))",
+                    borderRadius: 8,
+                    textAlign: "center",
+                  }}
+                >
+                  Товар не участвует в акциях и скидках
+                </div>
+              ) : (
+                <div className={styles.promoContainer}>
+                  {!promoExpanded ? (
+                    <div className={styles.promoTriggerRow}>
+                      <div className={styles.promoTextWrap}>
+                        <Tag size={14} className={styles.promoTagIcon} />
+                        <span>Есть промокод?</span>
+                      </div>
+                      <button
+                        type="button"
+                        className={styles.promoLinkBtn}
+                        onClick={() => setPromoExpanded(true)}
                       >
-                        Применить
-                      </Button>
+                        Ввести
+                      </button>
                     </div>
-                    {promoSuccessMsg && (
-                      <span className={styles.promoSuccessText}>{promoSuccessMsg}</span>
-                    )}
-                  </form>
-                )}
-              </div>
+                  ) : (
+                    <form onSubmit={handleApplyPromo} className={styles.promoForm}>
+                      <div className={styles.promoInputRow}>
+                        <Input
+                          type="text"
+                          value={promocode}
+                          onChange={(e) => setPromocode(e.target.value)}
+                          placeholder="Промокод..."
+                          autoFocus
+                        />
+                        <Button
+                          type="submit"
+                          variant="secondary"
+                          size="md"
+                          loading={checkingPromo}
+                          disabled={!promocode.trim()}
+                        >
+                          Применить
+                        </Button>
+                      </div>
+                      {promoSuccessMsg && (
+                        <span className={styles.promoSuccessText}>{promoSuccessMsg}</span>
+                      )}
+                    </form>
+                  )}
+                </div>
+              )}
 
               <label className={styles.termsLabel}>
                 <input

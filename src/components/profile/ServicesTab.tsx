@@ -259,10 +259,24 @@ export const ServicesTab: React.FC = () => {
     [visibleServices, targetOrderId]
   );
 
+  // Direct lookup by ID if ?id=... or route param is present
+  const { data: directOrderData } = useQuery({
+    queryKey: ["user-services", "order-by-id", targetOrderId],
+    enabled: targetOrderId !== null && targetOnVisibleList === null,
+    queryFn: async () => {
+      try {
+        return await api.get<UserService>(`/user/services/${targetOrderId}`);
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 10_000,
+  });
+
   // Fallback lookup if ?id=... belongs to an order not in the currently loaded slice
   const { data: lookupData } = useQuery({
     queryKey: ["user-services", "lookup", targetOrderId],
-    enabled: targetOrderId !== null && !isLoading && targetOnVisibleList === null,
+    enabled: targetOrderId !== null && !isLoading && targetOnVisibleList === null && !directOrderData,
     queryFn: async () => {
       try {
         return await getUserServices({ limit: 50, offset: 0 });
@@ -275,9 +289,10 @@ export const ServicesTab: React.FC = () => {
 
   const resolvedTargetService = useMemo(() => {
     if (targetOnVisibleList) return targetOnVisibleList;
+    if (directOrderData) return directOrderData;
     if (targetOrderId === null) return null;
     return lookupData?.items?.find((s) => s.id === targetOrderId) ?? null;
-  }, [targetOnVisibleList, targetOrderId, lookupData]);
+  }, [targetOnVisibleList, directOrderData, targetOrderId, lookupData]);
 
   const activeViewSvc = manualViewSvc ?? resolvedTargetService;
 
@@ -350,6 +365,21 @@ export const ServicesTab: React.FC = () => {
   const qc = useQueryClient();
   const [runningAction, setRunningAction] = useState<string | null>(null);
 
+  // Auto-poll while target order is pending delivery/payment
+  const isTargetPending = activeViewSvc?.status === "pending";
+  useEffect(() => {
+    if (!isTargetPending) return;
+    const interval = setInterval(() => {
+      void qc.invalidateQueries({ queryKey: ["user-services"] });
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [isTargetPending, qc]);
+
+  const handleRenewService = (svc: UserService) => {
+    navigate(`/catalog/${svc.service_id}`);
+    toast.info("Выберите период или тариф для продления услуги");
+  };
+
   const handleServiceAction = async (svcId: number, action: string) => {
     try {
       setRunningAction(`${svcId}-${action}`);
@@ -407,12 +437,20 @@ export const ServicesTab: React.FC = () => {
     const instruction = extractInstruction(svc);
     const orderChips = extractOrderChips(svc);
     const isRevealed = Boolean(revealedIds[svc.id]);
-    const meta = STATUS_META[svc.status] || {
+    const isKeyDelivery = catalogSvc?.delivery === "key" || svc.product_kind === "key";
+    let meta = STATUS_META[svc.status] || {
       label: svc.status,
       variant: "muted" as const,
     };
+    if (isKeyDelivery && svc.status === "active") {
+      meta = { label: "Выдан", variant: "success" };
+    }
     const title = resolveServiceTitle(svc);
-    const canManage = svc.status === "active" || svc.status === "frozen";
+    const actionsList = Array.isArray(svc.actions) ? (svc.actions as string[]) : [];
+    const canRenew = !isKeyDelivery && svc.status === "active" && (actionsList.includes("renew") || Boolean(svc.expires_at));
+    const canFreeze = !isKeyDelivery && svc.status === "active" && actionsList.includes("freeze") && Boolean(svc.expires_at);
+    const canUnfreeze = !isKeyDelivery && svc.status === "frozen" && (actionsList.includes("unfreeze") || actionsList.includes("freeze"));
+    const canManage = canRenew || canFreeze || canUnfreeze;
     const hasActionsBar = Boolean(viewSchema || instruction || canManage);
 
     return (
@@ -503,23 +541,20 @@ export const ServicesTab: React.FC = () => {
               </button>
             )}
 
-            {svc.status === "active" && (
+            {canRenew && (
               <button
                 type="button"
                 className={styles.actionPillBtn}
                 disabled={Boolean(runningAction)}
-                onClick={() => handleServiceAction(svc.id, "renew")}
+                onClick={() => handleRenewService(svc)}
                 title="Продлить услугу"
               >
-                <RefreshCw
-                  size={13}
-                  className={runningAction === `${svc.id}-renew` ? "animate-spin" : undefined}
-                />
+                <RefreshCw size={13} />
                 <span>Продлить</span>
               </button>
             )}
 
-            {svc.status === "active" && (
+            {canFreeze && (
               <button
                 type="button"
                 className={styles.actionPillBtn}
@@ -532,12 +567,12 @@ export const ServicesTab: React.FC = () => {
               </button>
             )}
 
-            {svc.status === "frozen" && (
+            {canUnfreeze && (
               <button
                 type="button"
                 className={styles.actionPillBtn}
                 disabled={Boolean(runningAction)}
-                onClick={() => handleServiceAction(svc.id, "renew")}
+                onClick={() => handleServiceAction(svc.id, "unfreeze")}
                 title="Возобновить действие услуги"
               >
                 <Play size={13} />
@@ -715,14 +750,46 @@ export const ServicesTab: React.FC = () => {
                   </>
                 )}
               </div>
-              <Badge
-                variant={(STATUS_META[activeViewSvc.status] || { variant: "muted" as const }).variant}
-                size="sm"
-                dot={STATUS_META[activeViewSvc.status]?.variant === "success"}
-              >
-                {(STATUS_META[activeViewSvc.status] || { label: activeViewSvc.status }).label}
-              </Badge>
+              {(() => {
+                const modalCatSvc = catalogServiceMap.get(activeViewSvc.service_id);
+                const modalIsKey = modalCatSvc?.delivery === "key" || activeViewSvc.product_kind === "key";
+                let modalMeta = STATUS_META[activeViewSvc.status] || {
+                  label: activeViewSvc.status,
+                  variant: "muted" as const,
+                };
+                if (modalIsKey && activeViewSvc.status === "active") {
+                  modalMeta = { label: "Выдан", variant: "success" };
+                }
+                return (
+                  <Badge
+                    variant={modalMeta.variant}
+                    size="sm"
+                    dot={modalMeta.variant === "success"}
+                  >
+                    {modalMeta.label}
+                  </Badge>
+                );
+              })()}
             </div>
+
+            {activeViewSvc.status === "pending" && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  background: "rgba(234, 179, 8, 0.1)",
+                  border: "1px solid rgba(234, 179, 8, 0.25)",
+                  color: "#eab308",
+                  fontSize: 13,
+                }}
+              >
+                <Loader2 size={16} className="animate-spin" />
+                <span>Заказ ожидает подтверждения оплаты или доставки...</span>
+              </div>
+            )}
 
             {extractOrderChips(activeViewSvc).length > 0 && (
               <div className={styles.configChips}>
