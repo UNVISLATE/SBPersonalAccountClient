@@ -461,38 +461,45 @@ export const ClientSchemaNode: React.FC<{
         </div>
       );
 
-    case "qr":
+    case "qr": {
+      const nodeProps = ((node as unknown as Record<string, unknown>).props as Record<string, unknown> | undefined) || {};
+      const val = node.value ?? (nodeProps.value as string | undefined);
       return (
         <div className={styles.qrFrame}>
           <QRCode
-            value={node.value}
-            size={node.size}
-            logo={node.logo}
-            logoSize={node.logoSize}
-            plateRadius={node.plateRadius}
-            errorCorrection={node.errorCorrection}
-            theme={(node as unknown as { theme?: "default" | "dark" | "light" | "brand" }).theme}
-            color={node.color}
-            backgroundColor={node.backgroundColor}
+            value={val}
+            size={node.size ?? (nodeProps.size as number | undefined)}
+            logo={node.logo ?? (nodeProps.logo as "UNVI" | "UNVIDark" | "UNVILight" | string | undefined)}
+            logoSize={node.logoSize ?? (nodeProps.logoSize as number | undefined)}
+            plateRadius={node.plateRadius ?? (nodeProps.plateRadius as number | undefined)}
+            errorCorrection={node.errorCorrection ?? (nodeProps.errorCorrection as "L" | "M" | "Q" | "H" | undefined)}
+            theme={((node as unknown as { theme?: "default" | "dark" | "light" | "brand" }).theme ?? (nodeProps.theme as "default" | "dark" | "light" | "brand" | undefined))}
+            color={node.color ?? (nodeProps.color as string | undefined)}
+            backgroundColor={node.backgroundColor ?? (nodeProps.backgroundColor as string | undefined)}
             className={node.className}
             style={node.style}
           />
         </div>
       );
+    }
 
     case "copy_field":
     case "key":
-    case "secret":
+    case "secret": {
+      const nodeProps = ((node as unknown as Record<string, unknown>).props as Record<string, unknown> | undefined) || {};
+      const val = node.value ?? node.content ?? (nodeProps.value as string | undefined) ?? (nodeProps.content as string | undefined) ?? "";
+      const lbl = node.label ?? (nodeProps.label as string | undefined);
       return (
         <CopyFieldWidget
           id={node.id}
-          label={node.label}
-          value={String(node.value ?? node.content ?? "")}
-          secret={node.type === "secret" || Boolean(node.secret)}
+          label={lbl}
+          value={String(val)}
+          secret={node.type === "secret" || Boolean(node.secret || nodeProps.secret)}
           className={node.className}
           style={node.style}
         />
       );
+    }
 
     case "markdown":
       return node.content ? (

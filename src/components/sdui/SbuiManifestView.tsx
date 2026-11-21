@@ -55,6 +55,33 @@ function interpolateNode(
       clone[key] = interpolateString(clone[key] as string, ctx);
     }
   }
+  if (clone.props && typeof clone.props === "object" && !Array.isArray(clone.props)) {
+    const interpolatedProps: Record<string, unknown> = { ...(clone.props as Record<string, unknown>) };
+    for (const key of templateKeys) {
+      if (typeof interpolatedProps[key] === "string") {
+        interpolatedProps[key] = interpolateString(interpolatedProps[key] as string, ctx);
+      }
+    }
+    clone.props = interpolatedProps;
+    if (clone.value === undefined && interpolatedProps.value !== undefined) {
+      clone.value = interpolatedProps.value as string;
+    }
+    if (clone.label === undefined && interpolatedProps.label !== undefined) {
+      clone.label = interpolatedProps.label as string;
+    }
+    if (clone.size === undefined && interpolatedProps.size !== undefined) {
+      clone.size = interpolatedProps.size as number;
+    }
+    if (clone.logo === undefined && interpolatedProps.logo !== undefined) {
+      clone.logo = interpolatedProps.logo as "UNVI" | "UNVIDark" | "UNVILight" | string;
+    }
+    if (clone.plateRadius === undefined && interpolatedProps.plateRadius !== undefined) {
+      clone.plateRadius = interpolatedProps.plateRadius as number;
+    }
+    if (clone.qrStyle === undefined && interpolatedProps.qrStyle !== undefined) {
+      clone.qrStyle = interpolatedProps.qrStyle as "liquid" | "rounded" | "classic";
+    }
+  }
   if (Array.isArray(clone.children)) {
     clone.children = (clone.children as ExtendedSchemaNode[]).map((child) =>
       interpolateNode(child, ctx)
@@ -156,6 +183,7 @@ export const SbuiManifestView: React.FC<SbuiManifestViewProps> = ({
     const cfg = (service.order_config || {}) as Record<string, unknown>;
     return {
       ...pub,
+      public: pub,
       public_data: pub,
       order_config: cfg,
       key: extractedKey ?? pub.key ?? "",
