@@ -122,4 +122,14 @@
       opacity: 0.85;
     }
   }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: $radius-md;
+    margin: 12px 0;
+    border: 1px solid $border-subtle;
+    display: block;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
 }

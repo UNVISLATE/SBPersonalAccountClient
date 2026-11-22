@@ -20,6 +20,10 @@ export const MarkdownContent: React.FC<MarkdownContentProps> = ({ content, class
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          img: ({ src, alt, ...props }) => {
+            if (!src || !isSafeHref(src)) return null;
+            return <img src={src} alt={alt || ""} loading="lazy" {...props} />;
+          },
           a: ({ href, children, ...props }) => {
             if (!isSafeHref(href)) {
               return <span>{children}</span>;
