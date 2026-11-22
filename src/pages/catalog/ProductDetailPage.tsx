@@ -1064,6 +1064,8 @@ export const ProductDetailPage: React.FC = () => {
         isSubmitting={isPurchasing}
         onOpenTopUp={openTopUp}
         onConfirm={executePurchase}
+        allowBonus={service.allow_promotions !== false}
+        fullBonusOnly={service.full_bonus_only === true}
       />
 
       <MediaLightbox

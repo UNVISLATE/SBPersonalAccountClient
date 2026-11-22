@@ -8,6 +8,7 @@ import { getProviderFeeInfo, groupPaymentProviders } from "@/lib/payment-provide
 import {
   ChevronDown,
   CreditCard,
+  Info,
   ShieldCheck,
   Sparkles,
   Wallet,
@@ -32,6 +33,8 @@ export interface OrderCheckoutModalProps {
   isSubmitting: boolean;
   onOpenTopUp: () => void;
   onConfirm: (selectedMethod: string, paymentCurrency?: string) => Promise<void> | void;
+  allowBonus?: boolean;
+  fullBonusOnly?: boolean;
 }
 
 export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
@@ -50,6 +53,8 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
   isSubmitting,
   onOpenTopUp,
   onConfirm,
+  allowBonus = true,
+  fullBonusOnly = false,
 }) => {
   const { sorted: sortedProviders, featured: featuredProviders, others: otherProviders } = useMemo(
     () => groupPaymentProviders(providers),
@@ -59,8 +64,14 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
   const primaryProvider = featuredProviders[0] || null;
 
   const netAfterPromo = Math.max(0, basePrice - promoDiscount);
-  const totalBalance = userBalance + bonusBalance;
-  const canPayFromBalance = totalBalance >= netAfterPromo;
+
+  // Determine bonus eligibility and amount that will actually be deducted
+  const canUseBonus = allowBonus && (!fullBonusOnly || bonusBalance >= netAfterPromo);
+
+  // Can pay from balance?
+  const canPayFromBalance = canUseBonus
+    ? (bonusBalance >= netAfterPromo || (userBalance + (fullBonusOnly ? 0 : bonusBalance) >= netAfterPromo))
+    : (userBalance >= netAfterPromo);
 
   const defaultMethod = useMemo(() => {
     if (canPayFromBalance) return "balance";
@@ -113,8 +124,10 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
     ? Math.round(netAfterPromo * (feeInfo.percent / 100) * 100) / 100
     : 0;
 
-  const bonusUsedOnBalance = isBalanceSelected
-    ? Math.min(bonusBalance, netAfterPromo)
+  const bonusUsedOnBalance = isBalanceSelected && canUseBonus
+    ? (fullBonusOnly
+        ? (bonusBalance >= netAfterPromo ? netAfterPromo : 0)
+        : Math.min(bonusBalance, netAfterPromo))
     : 0;
   const mainUsedOnBalance = isBalanceSelected
     ? Math.max(0, netAfterPromo - bonusUsedOnBalance)
@@ -129,7 +142,9 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
     return Number((payableAmount / rateToBase).toFixed(2));
   }, [isConverted, rateToBase, payableAmount]);
 
-  const maxUsableBonus = Math.min(bonusBalance, netAfterPromo);
+  const maxUsableBonus = canUseBonus
+    ? (fullBonusOnly ? (bonusBalance >= netAfterPromo ? netAfterPromo : 0) : Math.min(bonusBalance, netAfterPromo))
+    : 0;
 
   const renderProviderIcon = (p: PaymentProvider, size: "md" | "sm" = "md") => {
     if (p.icon_url) {
@@ -205,7 +220,7 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
             })}
 
             {/* Balance + Bonus Option */}
-            {(canPayFromBalance || totalBalance > 0) && (
+            {(canPayFromBalance || (allowBonus ? userBalance + bonusBalance > 0 : userBalance > 0)) && (
               <button
                 type="button"
                 className={clsx(
@@ -231,13 +246,25 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
                 </span>
 
                 <div className={styles.methodMain}>
-                  <span className={styles.methodTitle}>Баланс и бонусы</span>
+                  <span className={styles.methodTitle}>
+                    {allowBonus ? "Баланс и бонусы" : "Основной баланс"}
+                  </span>
                   <span className={styles.methodSubtext}>
-                    {canPayFromBalance
-                      ? bonusUsedOnBalance > 0 || bonusBalance > 0
-                        ? `Спишется ${formatCurrency(maxUsableBonus, currency)} бонусами`
-                        : `Доступно: ${formatCurrency(totalBalance, currency)}`
-                      : `Не хватает ${formatCurrency(netAfterPromo - totalBalance, currency)} — пополнить`}
+                    {!allowBonus
+                      ? canPayFromBalance
+                        ? `Доступно: ${formatCurrency(userBalance, currency)}`
+                        : `Не хватает ${formatCurrency(netAfterPromo - userBalance, currency)} — пополнить`
+                      : fullBonusOnly
+                        ? bonusBalance >= netAfterPromo
+                          ? `Спишется ${formatCurrency(netAfterPromo, currency)} бонусами (100%)`
+                          : userBalance >= netAfterPromo
+                            ? `Спишется с баланса: ${formatCurrency(netAfterPromo, currency)}`
+                            : `Не хватает ${formatCurrency(netAfterPromo - userBalance, currency)} на балансе (нужно 100% бонусов)`
+                        : canPayFromBalance
+                          ? bonusUsedOnBalance > 0 || bonusBalance > 0
+                            ? `Спишется ${formatCurrency(maxUsableBonus, currency)} бонусами`
+                            : `Доступно: ${formatCurrency(userBalance + bonusBalance, currency)}`
+                          : `Не хватает ${formatCurrency(netAfterPromo - (userBalance + bonusBalance), currency)} — пополнить`}
                   </span>
                 </div>
 
@@ -336,7 +363,7 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
               }}
             >
               На балансе {formatCurrency(userBalance, currency)}
-              {bonusBalance > 0 ? ` (+${formatCurrency(bonusBalance, currency)} бон.)` : ""} — пополнить
+              {allowBonus && bonusBalance > 0 ? ` (+${formatCurrency(bonusBalance, currency)} бон.)` : ""} — пополнить
             </button>
           </div>
 
@@ -389,6 +416,22 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
               </div>
             )}
 
+            {!allowBonus && (
+              <div className={styles.bonusTipRow}>
+                <Info size={13} />
+                <span>Оплата бонусами недоступна для этого товара</span>
+              </div>
+            )}
+
+            {allowBonus && fullBonusOnly && bonusBalance > 0 && bonusBalance < netAfterPromo && (
+              <div className={styles.bonusTipRow}>
+                <Info size={13} />
+                <span>
+                  Бонусы доступны только при 100% оплате (нужно {formatCurrency(netAfterPromo, currency)}, доступно {formatCurrency(bonusBalance, currency)})
+                </span>
+              </div>
+            )}
+
             {isBalanceSelected && bonusUsedOnBalance > 0 && (
               <div className={clsx(styles.breakRow, styles.savingRow)}>
                 <span>Спишется с бонусов</span>
@@ -396,7 +439,7 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
               </div>
             )}
 
-            {!isBalanceSelected && maxUsableBonus > 0 && (
+            {!isBalanceSelected && allowBonus && maxUsableBonus > 0 && (
               <div className={styles.bonusTipRow}>
                 <Sparkles size={13} />
                 <span>
@@ -437,6 +480,7 @@ export const OrderCheckoutModal: React.FC<OrderCheckoutModalProps> = ({
               variant="gradient"
               size="lg"
               loading={isSubmitting}
+              disabled={isBalanceSelected && !canPayFromBalance}
               onClick={() => onConfirm(activeMethod, effectivePaymentCurrency)}
               className={styles.confirmBtn}
             >
