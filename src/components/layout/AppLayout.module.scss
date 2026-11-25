@@ -60,7 +60,42 @@
 .footerBrand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.footerSep {
+  color: var(--color-text-muted);
+  opacity: 0.45;
+}
+
+.poweredBy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.poweredLink {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--color-accent-hover);
+  }
+}
+
+.versionTag {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-secondary);
 }
 
 .footerDot {

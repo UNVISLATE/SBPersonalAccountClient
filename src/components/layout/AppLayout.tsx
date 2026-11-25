@@ -69,6 +69,23 @@ export const AppLayout: React.FC = () => {
               <div className={styles.copyright}>
                 © {new Date().getFullYear()} {branding.name}. Все права защищены.
               </div>
+              <span className={styles.footerSep} aria-hidden="true">·</span>
+              <span className={styles.poweredBy}>
+                Работает на{" "}
+                <a
+                  href="https://saviorbill.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.poweredLink}
+                >
+                  SaviorBill
+                </a>
+                {(import.meta.env.VITE_APP_VERSION || branding.version) && (
+                  <span className={styles.versionTag}>
+                    {import.meta.env.VITE_APP_VERSION || branding.version}
+                  </span>
+                )}
+              </span>
             </div>
             <div className={styles.footerLinks}>
               {branding.telegram_channel && (
