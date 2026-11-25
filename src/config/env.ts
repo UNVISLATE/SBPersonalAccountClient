@@ -8,12 +8,22 @@ function normalizeBaseUrl(raw: string | undefined, fallback: string): string {
   return trimmed.replace(/\/+$/, "") || fallback
 }
 
-function readEnvValue(key: "VITE_API_BASE_URL" | "VITE_MEDIA_BASE_URL" | "VITE_AUTH_BASE_URL"): string | undefined {
+type EnvKey =
+  | "VITE_API_BASE_URL"
+  | "VITE_MEDIA_BASE_URL"
+  | "VITE_AUTH_BASE_URL"
+  | "VITE_SITE_TITLE"
+  | "VITE_SITE_DESCRIPTION"
+  | "VITE_FAVICON_URL"
+  | "VITE_LOGO_URL"
+
+function readEnvValue(key: EnvKey): string | undefined {
   const runtime = typeof window !== "undefined" ? window.__SB_CONFIG__?.[key] : undefined
   if (typeof runtime === "string" && runtime.trim()) {
-    return runtime
+    return runtime.trim()
   }
-  return import.meta.env[key]
+  const buildVal = import.meta.env[key]
+  return typeof buildVal === "string" && buildVal.trim() ? buildVal.trim() : undefined
 }
 
 /**
@@ -42,6 +52,11 @@ export const AUTH_BASE_URL = normalizeBaseUrl(
   readEnvValue("VITE_AUTH_BASE_URL"),
   `${API_BASE_URL}/auth`
 )
+
+export const SITE_TITLE_OVERRIDE = readEnvValue("VITE_SITE_TITLE")
+export const SITE_DESCRIPTION_OVERRIDE = readEnvValue("VITE_SITE_DESCRIPTION")
+export const FAVICON_URL_OVERRIDE = readEnvValue("VITE_FAVICON_URL")
+export const LOGO_URL_OVERRIDE = readEnvValue("VITE_LOGO_URL")
 
 /**
  * Build a full request URL for Billing API or Media Worker paths.

@@ -6,6 +6,10 @@ interface ImportMetaEnv {
   readonly VITE_AUTH_BASE_URL?: string
   readonly VITE_DEV_API_TARGET?: string
   readonly VITE_DEV_MEDIA_TARGET?: string
+  readonly VITE_SITE_TITLE?: string
+  readonly VITE_SITE_DESCRIPTION?: string
+  readonly VITE_FAVICON_URL?: string
+  readonly VITE_LOGO_URL?: string
 }
 
 interface ImportMeta {
@@ -16,6 +20,10 @@ interface RuntimeSbConfig {
   readonly VITE_API_BASE_URL?: string
   readonly VITE_MEDIA_BASE_URL?: string
   readonly VITE_AUTH_BASE_URL?: string
+  readonly VITE_SITE_TITLE?: string
+  readonly VITE_SITE_DESCRIPTION?: string
+  readonly VITE_FAVICON_URL?: string
+  readonly VITE_LOGO_URL?: string
 }
 
 interface Window {

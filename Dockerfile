@@ -21,9 +21,10 @@ RUN npm run build
 
 FROM nginx:alpine AS runtime
 
-RUN rm -rf /usr/share/nginx/html/*
+RUN apk add --no-cache jq && rm -rf /usr/share/nginx/html/*
 
 COPY --from=builder /app/dist /usr/share/nginx/html
+RUN cp /usr/share/nginx/html/index.html /usr/share/nginx/html/index.template.html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker-entrypoint.d/40-env-config.sh /docker-entrypoint.d/40-env-config.sh
 RUN sed -i 's/\r$//' /docker-entrypoint.d/40-env-config.sh && chmod +x /docker-entrypoint.d/40-env-config.sh

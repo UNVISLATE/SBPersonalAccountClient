@@ -1,7 +1,12 @@
 import { useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/api/client"
-import { resolveAssetUrl } from "@/config/env"
+import {
+  FAVICON_URL_OVERRIDE,
+  LOGO_URL_OVERRIDE,
+  SITE_TITLE_OVERRIDE,
+  resolveAssetUrl,
+} from "@/config/env"
 
 export interface StoreBranding {
   name: string
@@ -23,9 +28,9 @@ export interface StoreBranding {
 }
 
 export const DEFAULT_BRANDING: StoreBranding = {
-  name: "SaviorBill",
-  logo_url: "/unvi/logo_1x1_128.webp",
-  favicon_url: "/favicon.svg",
+  name: SITE_TITLE_OVERRIDE || "SaviorBill Client",
+  logo_url: resolveAssetUrl(LOGO_URL_OVERRIDE) || "/unvi/logo_1x1_128.webp",
+  favicon_url: resolveAssetUrl(FAVICON_URL_OVERRIDE) || "/favicon.svg",
   mascot_url: "/unvi/mascot/HelloMascotUNVI.webp",
   mascot_not_found_url: "/unvi/mascot/NotFoundMascotUNVI.webp",
   catalog_banner_url: null,
@@ -77,9 +82,15 @@ export function useBranding() {
         const s = res.settings || {}
 
         return {
-          name: res.name || res.shop_name || DEFAULT_BRANDING.name,
-          logo_url: resolveAssetUrl(res.logo_url) || DEFAULT_BRANDING.logo_url,
-          favicon_url: resolveAssetUrl(res.favicon_url) || DEFAULT_BRANDING.favicon_url,
+          name: SITE_TITLE_OVERRIDE || res.name || res.shop_name || DEFAULT_BRANDING.name,
+          logo_url:
+            resolveAssetUrl(LOGO_URL_OVERRIDE) ||
+            resolveAssetUrl(res.logo_url) ||
+            DEFAULT_BRANDING.logo_url,
+          favicon_url:
+            resolveAssetUrl(FAVICON_URL_OVERRIDE) ||
+            resolveAssetUrl(res.favicon_url) ||
+            DEFAULT_BRANDING.favicon_url,
           mascot_url: resolveAssetUrl(res.mascot_url) || DEFAULT_BRANDING.mascot_url,
           mascot_not_found_url:
             resolveAssetUrl(res.mascot_not_found_url) || DEFAULT_BRANDING.mascot_not_found_url,
@@ -119,7 +130,9 @@ export function useBranding() {
   const branding = data || DEFAULT_BRANDING
 
   useEffect(() => {
-    if (branding.name) {
+    if (SITE_TITLE_OVERRIDE) {
+      document.title = SITE_TITLE_OVERRIDE
+    } else if (branding.name) {
       document.title = `${branding.name} — Личный кабинет`
     }
 
