@@ -85,13 +85,7 @@
 }
 
 .gridOverlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 28px 28px;
-  pointer-events: none;
+  display: none;
 }
 
 .heroContent {
@@ -128,12 +122,11 @@
 .productTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(26px, 3.6vw, 40px);
-  font-weight: 900;
-  line-height: 1.05;
+  font-size: clamp(24px, 3.2vw, 34px);
+  font-weight: 700;
+  line-height: 1.12;
   color: var(--color-text);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
 .badgesRow {

@@ -3,10 +3,10 @@
 
 .page {
   width: 100%;
-  padding: 28px 24px 64px;
+  padding: 24px 24px 64px;
 
   @include mobile {
-    padding: 18px 16px 48px;
+    padding: 16px 16px 48px;
   }
 }
 
@@ -22,17 +22,68 @@
   }
 }
 
-.controlsStack {
+.contentLayout {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+
+  @include tablet {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+}
+
+.sidebar {
+  position: sticky;
+  top: 88px;
+  min-width: 0;
+
+  @include tablet {
+    position: static;
+  }
+}
+
+.mainContent {
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+.resultsMeta {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.resultsCount {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .sortRow {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
+  padding: 3px;
+  border-radius: $radius-md;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border-subtle;
   overflow-x: auto;
+  max-width: 100%;
   @include hide-scrollbar;
 }
 
@@ -40,42 +91,43 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 32px;
-  padding: 0 13px;
-  border-radius: $radius-full;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid $border-subtle;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background $transition-fast, border-color $transition-fast, color $transition-fast;
+  transition: background $transition-fast, color $transition-fast, border-color $transition-fast;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.06);
     color: var(--color-text);
+    background: rgba(255, 255, 255, 0.04);
   }
 }
 
 .sortActive {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: $border-glass-hover;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
   color: var(--color-text);
+  font-weight: 600;
 }
 
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(3, 1fr);
+  @media (max-width: 1180px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @include tablet {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @include mobile {

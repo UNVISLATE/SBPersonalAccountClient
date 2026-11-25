@@ -50,14 +50,13 @@
 .modalTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
   color: var(--color-text);
 
   @include mobile {
-    font-size: 19px;
+    font-size: 18px;
   }
 }
 

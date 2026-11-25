@@ -99,11 +99,10 @@
 }
 
 .footerDot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--color-accent, #{$accent-default});
-  box-shadow: 0 0 10px var(--color-accent-glow, #{$accent-glow});
   flex-shrink: 0;
 }
 

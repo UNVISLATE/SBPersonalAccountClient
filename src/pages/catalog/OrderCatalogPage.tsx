@@ -147,7 +147,7 @@ export const OrderCatalogPage: React.FC = () => {
   }, [categories]);
 
   const filteredServices = useMemo(() => {
-    const list = services.filter((svc) => {
+    return services.filter((svc) => {
       if (selectedSubCatId !== "all") {
         if (svc.catalog_id !== selectedSubCatId) return false;
       } else if (selectedCatId !== "all") {
@@ -165,28 +165,7 @@ export const OrderCatalogPage: React.FC = () => {
 
       return true;
     });
-
-    return [...list].sort((a, b) => {
-      switch (sortBy) {
-        case "recommended": {
-          const recA = a.is_recommended ? 1 : 0;
-          const recB = b.is_recommended ? 1 : 0;
-          if (recA !== recB) return recB - recA;
-          return b.id - a.id;
-        }
-        case "newest":
-          return b.id - a.id;
-        case "popularity":
-          return (b.orders_count || 0) - (a.orders_count || 0);
-        case "price_asc":
-          return Number(a.price) - Number(b.price);
-        case "price_desc":
-          return Number(b.price) - Number(a.price);
-        default:
-          return 0;
-      }
-    });
-  }, [services, selectedCatId, selectedSubCatId, subCategories, searchQuery, sortBy]);
+  }, [services, selectedCatId, selectedSubCatId, subCategories, searchQuery]);
 
   const handleSelectRoot = (id: number | "all") => {
     setSelectedSubCatId("all");
@@ -224,106 +203,117 @@ export const OrderCatalogPage: React.FC = () => {
           />
         </Reveal>
 
-        <Reveal variant="fade-up" delay={60} eager className={styles.controlsStack}>
-          <CategoryBar
-            rootCategories={rootCategories}
-            subCategories={subCategories}
-            selectedCatId={selectedCatId}
-            selectedSubCatId={selectedSubCatId}
-            totalServicesCount={totalAvailable}
-            onSelectRoot={handleSelectRoot}
-            onSelectSub={setSelectedSubCatId}
-          />
+        <div className={styles.contentLayout}>
+          <aside className={styles.sidebar} aria-label="Категории каталога">
+            <CategoryBar
+              rootCategories={rootCategories}
+              subCategories={subCategories}
+              selectedCatId={selectedCatId}
+              selectedSubCatId={selectedSubCatId}
+              totalServicesCount={totalAvailable}
+              onSelectRoot={handleSelectRoot}
+              onSelectSub={setSelectedSubCatId}
+            />
+          </aside>
 
-          <div className={styles.sortRow}>
-            <button
-              type="button"
-              className={clsx(styles.sortBtn, sortBy === "recommended" && styles.sortActive)}
-              onClick={() => setSortBy("recommended")}
-            >
-              <Star size={13} />
-              <span>Рекомендуемые</span>
-            </button>
-            <button
-              type="button"
-              className={clsx(styles.sortBtn, sortBy === "newest" && styles.sortActive)}
-              onClick={() => setSortBy("newest")}
-            >
-              <Clock size={13} />
-              <span>Новинки</span>
-            </button>
-            <button
-              type="button"
-              className={clsx(styles.sortBtn, sortBy === "popularity" && styles.sortActive)}
-              onClick={() => setSortBy("popularity")}
-            >
-              <Flame size={13} />
-              <span>Популярные</span>
-            </button>
-            <button
-              type="button"
-              className={clsx(
-                styles.sortBtn,
-                (sortBy === "price_asc" || sortBy === "price_desc") && styles.sortActive
-              )}
-              onClick={() => setSortBy(sortBy === "price_asc" ? "price_desc" : "price_asc")}
-            >
-              <CircleDollarSign size={13} />
-              <span>{sortBy === "price_desc" ? "Дороже" : "Дешевле"}</span>
-              <ArrowUpDown size={12} />
-            </button>
-          </div>
-        </Reveal>
+          <div className={styles.mainContent}>
+            <div className={styles.toolbar}>
+              <span className={styles.resultsMeta}>
+                {activeCategory ? activeCategory.name : "Все товары"}
+                <span className={styles.resultsCount}> · {heroTotalCount}</span>
+              </span>
 
-        {isLoading ? (
-          <div className={styles.productsGrid}>
-            {Array.from({ length: 8 }).map((_, idx) => (
-              <Skeleton key={idx} height={330} rounded="xl" />
-            ))}
-          </div>
-        ) : filteredServices.length === 0 ? (
-          <Reveal variant="fade-up" eager className={styles.emptyState}>
-            <div className={styles.emptyIconWrap}>
-              <PackageX size={28} />
-            </div>
-            <h3 className={styles.emptyTitle}>Товары не найдены</h3>
-            <p className={styles.emptySubtitle}>
-              {searchQuery
-                ? "Попробуйте изменить поисковый запрос или сбросить фильтры категорий"
-                : "В этой категории пока нет доступных предложений"}
-            </p>
-          </Reveal>
-        ) : (
-          <>
-            <div className={styles.productsGrid}>
-              {filteredServices.map((svc) => (
-                <motion.div
-                  key={svc.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
+              <div className={styles.sortRow}>
+                <button
+                  type="button"
+                  className={clsx(styles.sortBtn, sortBy === "recommended" && styles.sortActive)}
+                  onClick={() => setSortBy("recommended")}
                 >
-                  <ServiceCard
-                    service={svc}
-                    categoryName={svc.catalog_id ? categoryMap.get(svc.catalog_id)?.name : null}
-                    defaultCurrency={defaultCurrency}
-                  />
-                </motion.div>
-              ))}
+                  <Star size={13} />
+                  <span>Рекомендуемые</span>
+                </button>
+                <button
+                  type="button"
+                  className={clsx(styles.sortBtn, sortBy === "newest" && styles.sortActive)}
+                  onClick={() => setSortBy("newest")}
+                >
+                  <Clock size={13} />
+                  <span>Новинки</span>
+                </button>
+                <button
+                  type="button"
+                  className={clsx(styles.sortBtn, sortBy === "popularity" && styles.sortActive)}
+                  onClick={() => setSortBy("popularity")}
+                >
+                  <Flame size={13} />
+                  <span>Популярные</span>
+                </button>
+                <button
+                  type="button"
+                  className={clsx(
+                    styles.sortBtn,
+                    (sortBy === "price_asc" || sortBy === "price_desc") && styles.sortActive
+                  )}
+                  onClick={() => setSortBy(sortBy === "price_asc" ? "price_desc" : "price_asc")}
+                >
+                  <CircleDollarSign size={13} />
+                  <span>{sortBy === "price_desc" ? "Дороже" : "Дешевле"}</span>
+                  <ArrowUpDown size={12} />
+                </button>
+              </div>
             </div>
 
-            {hasNextPage && (
-              <div ref={sentinelRef} className={styles.loadMoreSentinel}>
-                {isFetchingNextPage && (
-                  <div className={styles.loadingBatchPill}>
-                    <Loader2 size={15} className={styles.spinIcon} />
-                    <span>Загрузка товаров...</span>
+            {isLoading ? (
+              <div className={styles.productsGrid}>
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <Skeleton key={idx} height={330} rounded="xl" />
+                ))}
+              </div>
+            ) : filteredServices.length === 0 ? (
+              <Reveal variant="fade-up" eager className={styles.emptyState}>
+                <div className={styles.emptyIconWrap}>
+                  <PackageX size={28} />
+                </div>
+                <h3 className={styles.emptyTitle}>Товары не найдены</h3>
+                <p className={styles.emptySubtitle}>
+                  {searchQuery
+                    ? "Попробуйте изменить поисковый запрос или сбросить фильтры категорий"
+                    : "В этой категории пока нет доступных предложений"}
+                </p>
+              </Reveal>
+            ) : (
+              <>
+                <div className={styles.productsGrid}>
+                  {filteredServices.map((svc) => (
+                    <motion.div
+                      key={svc.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
+                    >
+                      <ServiceCard
+                        service={svc}
+                        categoryName={svc.catalog_id ? categoryMap.get(svc.catalog_id)?.name : null}
+                        defaultCurrency={defaultCurrency}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+
+                {hasNextPage && (
+                  <div ref={sentinelRef} className={styles.loadMoreSentinel}>
+                    {isFetchingNextPage && (
+                      <div className={styles.loadingBatchPill}>
+                        <Loader2 size={15} className={styles.spinIcon} />
+                        <span>Загрузка товаров...</span>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );

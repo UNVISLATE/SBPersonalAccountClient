@@ -3,9 +3,10 @@
 
 .hero {
   position: relative;
-  @include glass-panel;
+  background: rgba(18, 18, 20, 0.88);
+  border: 1px solid $border-subtle;
   border-radius: $radius-xl;
-  padding: 28px 32px;
+  padding: 26px 28px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -18,40 +19,28 @@
     flex-direction: column;
     align-items: stretch;
     gap: 20px;
-    padding: 24px;
+    padding: 22px;
   }
 
   @include mobile {
-    padding: 20px 18px;
+    padding: 18px;
     border-radius: $radius-lg;
     gap: 16px;
   }
 }
 
 .gridOverlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: linear-gradient(120deg, black 25%, transparent 90%);
-  pointer-events: none;
+  display: none;
 }
 
 .ambientGlow {
   position: absolute;
-  right: -60px;
-  top: -80px;
-  width: 340px;
-  height: 260px;
-  border-radius: 50%;
+  inset: 0;
   background: radial-gradient(
-    circle,
-    var(--color-accent-subtle, rgba(0, 144, 128, 0.22)) 0%,
+    ellipse 60% 70% at 85% 0%,
+    rgba(0, 144, 128, 0.08) 0%,
     transparent 70%
   );
-  filter: blur(45px);
   pointer-events: none;
 }
 
@@ -61,7 +50,7 @@
   max-width: 680px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .topMeta {
@@ -75,10 +64,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  @include capsule-surface;
+  padding: 4px 10px;
+  @include capsule-surface(rgba(255, 255, 255, 0.04), $border-subtle);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-text-secondary);
 
   svg {
@@ -89,31 +78,31 @@
 .counter {
   font-size: 12px;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(28px, 3.8vw, 44px);
-  font-weight: 900;
-  line-height: 1.02;
-  letter-spacing: 0.02em;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
   color: var(--color-text);
-  text-transform: uppercase;
 }
 
 .subtitle {
   margin: 0;
   font-size: 14px;
   color: var(--color-text-secondary);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .searchBox {
   position: relative;
   z-index: 2;
-  width: 340px;
+  width: 320px;
   flex-shrink: 0;
 
   @include tablet {

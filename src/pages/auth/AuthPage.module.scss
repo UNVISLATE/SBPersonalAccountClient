@@ -69,14 +69,7 @@
 }
 
 .gridOverlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(circle at 50% 50%, black 35%, transparent 85%);
-  pointer-events: none;
+  display: none;
 }
 
 .glowOrb {
@@ -89,10 +82,10 @@
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    var(--color-accent-glow, rgba(0, 144, 128, 0.32)) 0%,
+    rgba(0, 144, 128, 0.14) 0%,
     transparent 70%
   );
-  filter: blur(42px);
+  filter: blur(48px);
   pointer-events: none;
 }
 
@@ -163,7 +156,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: rgba(12, 15, 23, 0.55);
+  background: rgba(16, 16, 18, 0.65);
 
   @include mobile {
     padding: 28px 20px;
@@ -215,15 +208,14 @@
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 26px;
+  font-weight: 700;
   color: var(--color-text);
-  letter-spacing: 0.02em;
-  line-height: 1.08;
-  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
 
   @include mobile {
-    font-size: 24px;
+    font-size: 22px;
   }
 }
 

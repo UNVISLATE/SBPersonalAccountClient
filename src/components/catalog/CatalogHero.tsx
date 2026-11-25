@@ -45,9 +45,7 @@ export const CatalogHero: React.FC<CatalogHeroProps> = ({
 
         <h1 className={styles.title}>
           <MaskText direction="up" duration={600}>
-            {activeCategory
-              ? activeCategory.name.toUpperCase()
-              : "КАТАЛОГ ТОВАРОВ И УСЛУГ"}
+            {activeCategory ? activeCategory.name : "Каталог товаров и услуг"}
           </MaskText>
         </h1>
 

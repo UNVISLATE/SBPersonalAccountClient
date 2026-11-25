@@ -141,6 +141,7 @@
 .balanceAmt {
   font-size: 13px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--color-text);
   white-space: nowrap;
 }
@@ -154,7 +155,8 @@
   background: var(--color-accent-subtle);
   color: var(--color-accent-hover);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
@@ -165,14 +167,14 @@
   width: 26px;
   height: 26px;
   border-radius: $radius-full;
-  background: var(--color-accent);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
   cursor: pointer;
-  transition: background $transition-fast, transform $transition-fast;
+  transition: background $transition-fast, color $transition-fast;
 
   &:hover {
-    background: var(--color-accent-hover);
-    transform: scale(1.1);
+    background: var(--color-accent);
+    color: #ffffff;
   }
 }
 
