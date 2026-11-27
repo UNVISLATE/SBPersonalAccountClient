@@ -112,3 +112,29 @@ export const getInvoices = (
     typeof paramsOrLimit === "number" ? { limit: paramsOrLimit } : paramsOrLimit
   return api.get<PageResponse<PaymentInvoice>>("/user/purchases", params)
 }
+
+export const request2faEmailReset = () =>
+  api.post<{ status: string }>("/user/me/2fa/email-reset/request")
+
+export const confirm2faEmailReset = (code: string) =>
+  api.post<void>("/user/me/2fa/email-reset/confirm", { code })
+
+export interface GdprStatus {
+  enabled: boolean
+  export_enabled: boolean
+  erasure_enabled: boolean
+  cooldown_remaining_sec: number
+  rate_limit_remaining_sec: number
+  allow_cooldown_bypass_with_2fa: boolean
+}
+
+export const getGdprStatus = () => api.get<GdprStatus>("/user/me/gdpr/status")
+
+export const exportGdprData = (totp_code?: string) =>
+  api.post<Record<string, unknown>>("/user/me/gdpr/export", totp_code ? { totp_code } : {})
+
+export const deleteGdprAccount = (payload: {
+  confirm: boolean
+  totp_code?: string
+  password?: string
+}) => api.post<void>("/user/me/gdpr/delete", payload)
