@@ -541,85 +541,97 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
             {/* ── Mode: Login / Register ── */}
             {mode !== "claim" && mode !== "reset" && (
               <>
-                <Input
-                  label="Логин"
-                  type="text"
-                  value={loginValue}
-                  onChange={(e) => setLoginValue(e.target.value)}
-                  placeholder="Ваш логин"
-                  leftIcon={<User size={17} />}
-                  autoComplete="username"
-                  required
-                />
-
-                <AnimatePresence initial={false}>
-                  {mode === "register" && (
-                    <motion.div
-                      key="email-field"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                      style={{ overflow: "hidden" }}
-                    >
-                      <Input
-                        label="Электронная почта"
-                        type="email"
-                        value={emailValue}
-                        onChange={(e) => setEmailValue(e.target.value)}
-                        placeholder="name@example.com"
-                        leftIcon={<Mail size={17} />}
-                        autoComplete="email"
-                        required
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <Input
-                  label="Пароль"
-                  type={showPassword ? "text" : "password"}
-                  value={passwordValue}
-                  onChange={(e) => setPasswordValue(e.target.value)}
-                  placeholder="••••••••••••"
-                  leftIcon={<Lock size={17} />}
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                  required
-                  rightSlot={
+                {mode === "login" && requiresTotp ? (
+                  <motion.div
+                    key="totp-step"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={styles.totpGroup}
+                  >
+                    <span className={styles.totpLabel}>
+                      Двухфакторная аутентификация — введите 6-значный код для «{loginValue}»
+                    </span>
+                    <OTPInput
+                      value={totpValue}
+                      onChange={setTotpValue}
+                      length={6}
+                      autoFocus
+                    />
                     <button
                       type="button"
-                      className={styles.eyeBtn}
-                      onClick={() => setShowPassword((v) => !v)}
-                      aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+                      className={styles.textLink}
+                      style={{ alignSelf: "flex-start", marginTop: 6 }}
+                      onClick={() => {
+                        setRequiresTotp(false);
+                        setTotpValue("");
+                      }}
                     >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      Назад ко входу
                     </button>
-                  }
-                />
+                  </motion.div>
+                ) : (
+                  <>
+                    <Input
+                      label="Логин"
+                      type="text"
+                      value={loginValue}
+                      onChange={(e) => setLoginValue(e.target.value)}
+                      placeholder="Ваш логин"
+                      leftIcon={<User size={17} />}
+                      autoComplete="username"
+                      required
+                    />
 
-                <AnimatePresence>
-                  {requiresTotp && (
-                    <motion.div
-                      key="totp-field"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      className={styles.totpGroup}
-                    >
-                      <span className={styles.totpLabel}>Код 2FA (Authenticator)</span>
-                      <OTPInput
-                        value={totpValue}
-                        onChange={setTotpValue}
-                        length={6}
-                        autoFocus
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    <AnimatePresence initial={false}>
+                      {mode === "register" && (
+                        <motion.div
+                          key="email-field"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                          style={{ overflow: "hidden" }}
+                        >
+                          <Input
+                            label="Электронная почта"
+                            type="email"
+                            value={emailValue}
+                            onChange={(e) => setEmailValue(e.target.value)}
+                            placeholder="name@example.com"
+                            leftIcon={<Mail size={17} />}
+                            autoComplete="email"
+                            required
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <Input
+                      label="Пароль"
+                      type={showPassword ? "text" : "password"}
+                      value={passwordValue}
+                      onChange={(e) => setPasswordValue(e.target.value)}
+                      placeholder="••••••••••••"
+                      leftIcon={<Lock size={17} />}
+                      autoComplete={mode === "login" ? "current-password" : "new-password"}
+                      required
+                      rightSlot={
+                        <button
+                          type="button"
+                          className={styles.eyeBtn}
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      }
+                    />
+                  </>
+                )}
               </>
             )}
 
-            {mode === "login" && (
+            {mode === "login" && !requiresTotp && (
               <div className={styles.formExtra}>
                 <label className={styles.checkboxLabel}>
                   <input

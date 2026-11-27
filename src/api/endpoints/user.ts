@@ -17,7 +17,7 @@ export const revokeSession = (sessionId: string | number) =>
   api.delete<void>(`/user/me/sessions/${sessionId}`)
 
 export const get2faStatus = () =>
-  api.get<{ enabled: boolean; required: boolean; recovery_codes_left: number }>("/user/me/2fa")
+  api.get<{ enabled: boolean; required: boolean; recovery_codes_left: number; email_configured?: boolean }>("/user/me/2fa")
 
 export const setup2fa = () =>
   api.post<{ secret: string; otpauth_url: string }>("/user/me/2fa/setup")

@@ -11,8 +11,9 @@ import { toast } from "sonner";
 import { api, ApiError } from "@/api/client";
 import { AnimatePresence, motion } from "motion/react";
 import { getService as getCatalogService } from "@/api/endpoints/catalog";
-import { getServices as getUserServices } from "@/api/endpoints/user";
+import { getServices as getUserServices, get2faStatus } from "@/api/endpoints/user";
 import type { CatalogService, CustomServiceAction, UserService } from "@/api/types";
+import { OTPInput } from "@/components/ui/OTPInput/OTPInput";
 import { useCopy } from "@/hooks/use-copy";
 import { useIsMobile } from "@/hooks/use-media-query";
 import { useInfiniteSentinel } from "@/hooks/use-infinite-sentinel";
@@ -368,12 +369,18 @@ export const ServicesTab: React.FC = () => {
   };
 
   const qc = useQueryClient();
+  const { data: twofaStatus } = useQuery({
+    queryKey: ["user-2fa-status"],
+    queryFn: get2faStatus,
+    staleTime: 60_000,
+  });
   const [runningAction, setRunningAction] = useState<string | null>(null);
   const [openManageSvcId, setOpenManageSvcId] = useState<number | null>(null);
   const [pendingCustomModal, setPendingCustomModal] = useState<{
     svc: UserService;
     actionDef: CustomServiceAction;
     verifyRequired?: string;
+    activeMethod: "2fa" | "email" | "setup_required";
     verifyCode: string;
     emailSent: boolean;
     sendingEmail: boolean;
@@ -474,12 +481,32 @@ export const ServicesTab: React.FC = () => {
       toast.error(`Действие недоступно в статусе «${svc.status}»`);
       return;
     }
-    const needsVerify = Boolean(actionDef.verify && actionDef.verify !== "none");
+    const verify = actionDef.verify || "none";
+    const needsVerify = verify !== "none";
     if (actionDef.confirm_text || needsVerify) {
+      const totpEnabled = Boolean(twofaStatus?.enabled);
+      const emailConfigured = Boolean(twofaStatus?.email_configured);
+      let activeMethod: "2fa" | "email" | "setup_required" = "2fa";
+      if (needsVerify) {
+        if (verify === "2fa" && !totpEnabled) {
+          activeMethod = "setup_required";
+        } else if (verify === "2fa_or_email") {
+          if (totpEnabled) {
+            activeMethod = "2fa";
+          } else if (emailConfigured) {
+            activeMethod = "email";
+          } else {
+            activeMethod = "setup_required";
+          }
+        } else if (verify === "email") {
+          activeMethod = "email";
+        }
+      }
       setPendingCustomModal({
         svc,
         actionDef,
-        verifyRequired: needsVerify ? actionDef.verify : undefined,
+        verifyRequired: needsVerify ? verify : undefined,
+        activeMethod,
         verifyCode: "",
         emailSent: false,
         sendingEmail: false,
@@ -1116,70 +1143,161 @@ export const ServicesTab: React.FC = () => {
             )}
 
             {pendingCustomModal.verifyRequired && pendingCustomModal.verifyRequired !== "none" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ fontSize: 13, opacity: 0.8 }}>
-                  {pendingCustomModal.verifyRequired === "2fa"
-                    ? "Введите 6-значный код из приложения-аутентификатора (2FA):"
-                    : pendingCustomModal.verifyRequired === "email"
-                    ? "Запросите одноразовый код на вашу почту и введите его ниже:"
-                    : "Введите код 2FA или запросите одноразовый код на email:"}
-                </div>
-                {(pendingCustomModal.verifyRequired === "email" ||
-                  pendingCustomModal.verifyRequired === "2fa_or_email") && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    disabled={pendingCustomModal.sendingEmail}
-                    onClick={handleSendActionChallenge}
-                  >
-                    {pendingCustomModal.sendingEmail
-                      ? "Отправка..."
-                      : pendingCustomModal.emailSent
-                      ? "Отправить код повторно"
-                      : "Отправить код на email"}
-                  </Button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {pendingCustomModal.activeMethod === "setup_required" ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.9 }}>
+                      Это действие требует настройки и подтверждения по 2FA.
+                    </div>
+                    <Button
+                      type="button"
+                      variant="gradient"
+                      onClick={() => {
+                        setPendingCustomModal(null);
+                        navigate("/profile/security");
+                      }}
+                    >
+                      Настроить 2FA
+                    </Button>
+                  </div>
+                ) : pendingCustomModal.activeMethod === "2fa" ? (
+                  <>
+                    <div style={{ fontSize: 13, opacity: 0.85 }}>
+                      Введите 6-значный код из приложения-аутентификатора (2FA):
+                    </div>
+                    <OTPInput
+                      value={pendingCustomModal.verifyCode}
+                      onChange={(val) =>
+                        setPendingCustomModal((prev) =>
+                          prev ? { ...prev, verifyCode: val } : null
+                        )
+                      }
+                      length={6}
+                      autoFocus
+                    />
+                    {twofaStatus?.email_configured &&
+                      pendingCustomModal.verifyRequired === "2fa_or_email" && (
+                        <button
+                          type="button"
+                          disabled={pendingCustomModal.sendingEmail}
+                          onClick={() => {
+                            setPendingCustomModal((prev) =>
+                              prev ? { ...prev, activeMethod: "email", verifyCode: "" } : null
+                            );
+                            void handleSendActionChallenge();
+                          }}
+                          style={{
+                            alignSelf: "flex-start",
+                            background: "transparent",
+                            border: "none",
+                            padding: 0,
+                            fontSize: 12,
+                            color: "var(--color-accent)",
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {pendingCustomModal.sendingEmail
+                            ? "Отправка кода..."
+                            : "Подтвердить по email"}
+                        </button>
+                      )}
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 13, opacity: 0.85 }}>
+                      {pendingCustomModal.emailSent
+                        ? "Введите одноразовый код, отправленный на вашу почту:"
+                        : "Запросите одноразовый код на вашу почту:"}
+                    </div>
+                    <Input
+                      placeholder="Код из письма (6 цифр)"
+                      value={pendingCustomModal.verifyCode}
+                      onChange={(e) =>
+                        setPendingCustomModal((prev) =>
+                          prev ? { ...prev, verifyCode: e.target.value } : null
+                        )
+                      }
+                    />
+                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                      <button
+                        type="button"
+                        disabled={pendingCustomModal.sendingEmail}
+                        onClick={() => void handleSendActionChallenge()}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          padding: 0,
+                          fontSize: 12,
+                          color: "var(--color-accent)",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        {pendingCustomModal.sendingEmail
+                          ? "Отправка..."
+                          : pendingCustomModal.emailSent
+                          ? "Отправить код повторно"
+                          : "Отправить код на email"}
+                      </button>
+                      {twofaStatus?.enabled &&
+                        pendingCustomModal.verifyRequired === "2fa_or_email" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPendingCustomModal((prev) =>
+                                prev ? { ...prev, activeMethod: "2fa", verifyCode: "" } : null
+                              )
+                            }
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              padding: 0,
+                              fontSize: 12,
+                              color: "var(--color-text-muted)",
+                              cursor: "pointer",
+                              textDecoration: "underline",
+                            }}
+                          >
+                            Вернуться к 2FA
+                          </button>
+                        )}
+                    </div>
+                  </>
                 )}
-                <Input
-                  placeholder="Код подтверждения (6 цифр)"
-                  value={pendingCustomModal.verifyCode}
-                  onChange={(e) =>
-                    setPendingCustomModal((prev) =>
-                      prev ? { ...prev, verifyCode: e.target.value } : null
-                    )
-                  }
-                />
               </div>
             )}
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4 }}>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setPendingCustomModal(null)}
-              >
-                Отмена
-              </Button>
-              <Button
-                type="button"
-                variant={pendingCustomModal.actionDef.variant === "danger" ? "danger" : "gradient"}
-                disabled={
-                  Boolean(runningAction) ||
-                  (Boolean(pendingCustomModal.verifyRequired) &&
-                    pendingCustomModal.verifyRequired !== "none" &&
-                    !pendingCustomModal.verifyCode.trim())
-                }
-                onClick={() =>
-                  void handleServiceAction(
-                    pendingCustomModal.svc.id,
-                    pendingCustomModal.actionDef.key,
-                    pendingCustomModal.verifyCode.trim() || undefined
-                  )
-                }
-              >
-                {runningAction ? "Выполнение..." : "Подтвердить"}
-              </Button>
-            </div>
+            {pendingCustomModal.activeMethod !== "setup_required" && (
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4 }}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setPendingCustomModal(null)}
+                >
+                  Отмена
+                </Button>
+                <Button
+                  type="button"
+                  variant={pendingCustomModal.actionDef.variant === "danger" ? "danger" : "gradient"}
+                  disabled={
+                    Boolean(runningAction) ||
+                    (Boolean(pendingCustomModal.verifyRequired) &&
+                      pendingCustomModal.verifyRequired !== "none" &&
+                      pendingCustomModal.verifyCode.trim().length < 6)
+                  }
+                  onClick={() =>
+                    void handleServiceAction(
+                      pendingCustomModal.svc.id,
+                      pendingCustomModal.actionDef.key,
+                      pendingCustomModal.verifyCode.trim() || undefined
+                    )
+                  }
+                >
+                  {runningAction ? "Выполнение..." : "Подтвердить"}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Modal>
