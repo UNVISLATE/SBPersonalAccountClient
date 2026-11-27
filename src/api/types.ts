@@ -53,6 +53,9 @@ export interface UserService {
   created_at: string
   delivered_at?: string | null
   auto_renew?: boolean
+  auto_renew_last_error?: string | null
+  pending_order_config?: Record<string, unknown> | null
+  pending_apply_at?: string | null
   cost?: number
   order_config?: Record<string, unknown>
   public_data?: Record<string, unknown>
@@ -195,6 +198,7 @@ export interface CatalogService {
   currency: string
   price_type?: string
   pricing_config?: Record<string, unknown>
+  settings?: Record<string, unknown>
   delivery?: "key" | "auto" | "manual" | string
   out_of_stock?: boolean
   is_recommended?: boolean

@@ -388,8 +388,51 @@ export const ServicesTab: React.FC = () => {
   }, [isTargetPending, qc]);
 
   const handleRenewService = (svc: UserService) => {
+    const cat = catalogServiceMap.get(svc.service_id);
+    const allowEarly = Boolean(
+      (cat?.settings as Record<string, unknown> | undefined)?.allow_early_renew
+    );
+    if (allowEarly) {
+      setRenewModalSvc(svc);
+      return;
+    }
     navigate(`/catalog/${svc.service_id}`);
     toast.info("Выберите период или тариф для продления услуги");
+  };
+
+  const [renewModalSvc, setRenewModalSvc] = useState<UserService | null>(null);
+  const [renewSubmitting, setRenewSubmitting] = useState(false);
+
+  const handleConfirmBalanceRenew = async () => {
+    if (!renewModalSvc) return;
+    try {
+      setRenewSubmitting(true);
+      await api.post(`/user/services/${renewModalSvc.id}/renew`, {});
+      toast.success("Услуга успешно продлена с баланса!");
+      setRenewModalSvc(null);
+      await qc.invalidateQueries({ queryKey: ["user-services"] });
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.detail : "Не удалось продлить услугу";
+      toast.error(msg);
+    } finally {
+      setRenewSubmitting(false);
+    }
+  };
+
+  const handleToggleAutoRenew = async (svc: UserService) => {
+    try {
+      setRunningAction(`${svc.id}-autorenew`);
+      await api.patch(`/user/services/${svc.id}/auto-renew`, {
+        enabled: !svc.auto_renew,
+      });
+      toast.success(!svc.auto_renew ? "Автопродление включено" : "Автопродление отключено");
+      await qc.invalidateQueries({ queryKey: ["user-services"] });
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.detail : "Не удалось изменить автопродление";
+      toast.error(msg);
+    } finally {
+      setRunningAction(null);
+    }
   };
 
   const handleServiceAction = async (svcId: number, action: string, verifyCode?: string) => {
@@ -515,10 +558,12 @@ export const ServicesTab: React.FC = () => {
     const canRenew = !isKeyDelivery && svc.status === "active" && (actionsList.includes("renew") || Boolean(svc.expires_at));
     const canFreeze = !isKeyDelivery && svc.status === "active" && actionsList.includes("freeze") && Boolean(svc.expires_at);
     const canUnfreeze = !isKeyDelivery && svc.status === "frozen" && (actionsList.includes("unfreeze") || actionsList.includes("freeze"));
+    const catSettings = (catalogSvc?.settings as Record<string, unknown> | undefined) || {};
+    const allowAutoRenew = Boolean(catSettings.allow_auto_renew) || Boolean(svc.auto_renew);
     const customActions = (Array.isArray(svc.custom_actions) ? svc.custom_actions : []).filter(
       (ca) => !ca.allowed_statuses || ca.allowed_statuses.includes(svc.status)
     );
-    const canManage = canRenew || canFreeze || canUnfreeze || customActions.length > 0;
+    const canManage = canRenew || canFreeze || canUnfreeze || allowAutoRenew || customActions.length > 0;
     const hasActionsBar = Boolean(viewSchema || instruction || canManage);
 
     return (
@@ -645,6 +690,23 @@ export const ServicesTab: React.FC = () => {
               >
                 <Play size={13} />
                 <span>Разморозить</span>
+              </button>
+            )}
+
+            {allowAutoRenew && (svc.status === "active" || svc.status === "stopped" || svc.status === "frozen") && (
+              <button
+                type="button"
+                className={styles.actionPillBtn}
+                disabled={Boolean(runningAction)}
+                onClick={() => void handleToggleAutoRenew(svc)}
+                title={
+                  svc.auto_renew_last_error
+                    ? `Ошибка автопродления: ${svc.auto_renew_last_error}`
+                    : "Автопродление с баланса"
+                }
+              >
+                <RefreshCw size={13} />
+                <span>{svc.auto_renew ? "Автопродление: ВКЛ" : "Автопродление: ВЫКЛ"}</span>
               </button>
             )}
 
@@ -950,6 +1012,52 @@ export const ServicesTab: React.FC = () => {
         {activeInstrContent && (
           <div className={styles.instrModalBody}>
             <MarkdownContent content={activeInstrContent} />
+          </div>
+        )}
+      </Modal>
+
+      {/* Early Balance Renew Modal */}
+      <Modal
+        isOpen={Boolean(renewModalSvc)}
+        onClose={() => setRenewModalSvc(null)}
+        title="Продление услуги"
+        subtitle={renewModalSvc ? resolveServiceTitle(renewModalSvc) : undefined}
+        maxWidth={420}
+      >
+        {renewModalSvc && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, opacity: 0.9 }}>
+              Продлить заказ #{renewModalSvc.id} на следующий период с основного/бонусного баланса?
+              {renewModalSvc.pending_apply_at && (
+                <>
+                  <br />
+                  <span style={{ opacity: 0.75, fontSize: 13 }}>
+                    Запланированная смена конфигурации применится {formatDate(renewModalSvc.pending_apply_at)}.
+                  </span>
+                </>
+              )}
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  const target = renewModalSvc;
+                  setRenewModalSvc(null);
+                  if (target) navigate(`/catalog/${target.service_id}`);
+                }}
+              >
+                Оплатить через провайдера
+              </Button>
+              <Button
+                type="button"
+                variant="gradient"
+                disabled={renewSubmitting}
+                onClick={() => void handleConfirmBalanceRenew()}
+              >
+                {renewSubmitting ? "Продление..." : "Продлить с баланса"}
+              </Button>
+            </div>
           </div>
         )}
       </Modal>
