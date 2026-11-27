@@ -44,6 +44,8 @@ import {
   RefreshCw,
   Snowflake,
   Play,
+  ChevronDown,
+  Settings2,
 } from "lucide-react";
 import styles from "./ServicesTab.module.scss";
 
@@ -367,6 +369,7 @@ export const ServicesTab: React.FC = () => {
 
   const qc = useQueryClient();
   const [runningAction, setRunningAction] = useState<string | null>(null);
+  const [openManageSvcId, setOpenManageSvcId] = useState<number | null>(null);
   const [pendingCustomModal, setPendingCustomModal] = useState<{
     svc: UserService;
     actionDef: CustomServiceAction;
@@ -654,78 +657,108 @@ export const ServicesTab: React.FC = () => {
               </button>
             )}
 
-            {canRenew && (
-              <button
-                type="button"
-                className={styles.actionPillBtn}
-                disabled={Boolean(runningAction)}
-                onClick={() => handleRenewService(svc)}
-                title="Продлить услугу"
-              >
-                <RefreshCw size={13} />
-                <span>Продлить</span>
-              </button>
-            )}
+            {canManage && (
+              <div className={styles.manageDropdown}>
+                <button
+                  type="button"
+                  className={styles.actionPillBtn}
+                  disabled={Boolean(runningAction)}
+                  onClick={() =>
+                    setOpenManageSvcId((prev) => (prev === svc.id ? null : svc.id))
+                  }
+                >
+                  <Settings2 size={14} />
+                  <span>Управление услугой</span>
+                  <ChevronDown size={14} />
+                </button>
 
-            {canFreeze && (
-              <button
-                type="button"
-                className={styles.actionPillBtn}
-                disabled={Boolean(runningAction)}
-                onClick={() => handleServiceAction(svc.id, "freeze")}
-                title="Приостановить действие услуги"
-              >
-                <Snowflake size={13} />
-                <span>Заморозить</span>
-              </button>
-            )}
+                {openManageSvcId === svc.id && (
+                  <div className={styles.manageMenu}>
+                    {canRenew && (
+                      <button
+                        type="button"
+                        className={styles.manageMenuItem}
+                        disabled={Boolean(runningAction)}
+                        onClick={() => {
+                          setOpenManageSvcId(null);
+                          handleRenewService(svc);
+                        }}
+                      >
+                        <RefreshCw size={14} />
+                        <span>Продлить</span>
+                      </button>
+                    )}
 
-            {canUnfreeze && (
-              <button
-                type="button"
-                className={styles.actionPillBtn}
-                disabled={Boolean(runningAction)}
-                onClick={() => handleServiceAction(svc.id, "unfreeze")}
-                title="Возобновить действие услуги"
-              >
-                <Play size={13} />
-                <span>Разморозить</span>
-              </button>
-            )}
+                    {canFreeze && (
+                      <button
+                        type="button"
+                        className={styles.manageMenuItem}
+                        disabled={Boolean(runningAction)}
+                        onClick={() => {
+                          setOpenManageSvcId(null);
+                          void handleServiceAction(svc.id, "freeze");
+                        }}
+                      >
+                        <Snowflake size={14} />
+                        <span>Заморозить</span>
+                      </button>
+                    )}
 
-            {allowAutoRenew && (svc.status === "active" || svc.status === "stopped" || svc.status === "frozen") && (
-              <button
-                type="button"
-                className={styles.actionPillBtn}
-                disabled={Boolean(runningAction)}
-                onClick={() => void handleToggleAutoRenew(svc)}
-                title={
-                  svc.auto_renew_last_error
-                    ? `Ошибка автопродления: ${svc.auto_renew_last_error}`
-                    : "Автопродление с баланса"
-                }
-              >
-                <RefreshCw size={13} />
-                <span>{svc.auto_renew ? "Автопродление: ВКЛ" : "Автопродление: ВЫКЛ"}</span>
-              </button>
-            )}
+                    {canUnfreeze && (
+                      <button
+                        type="button"
+                        className={styles.manageMenuItem}
+                        disabled={Boolean(runningAction)}
+                        onClick={() => {
+                          setOpenManageSvcId(null);
+                          void handleServiceAction(svc.id, "unfreeze");
+                        }}
+                      >
+                        <Play size={14} />
+                        <span>Разморозить</span>
+                      </button>
+                    )}
 
-            {customActions.map((ca) => (
-              <button
-                key={ca.key}
-                type="button"
-                className={styles.actionPillBtn}
-                style={
-                  ca.variant === "danger"
-                    ? { borderColor: "rgba(239, 68, 68, 0.4)", color: "#f87171" }
-                    : undefined
-                }
-                disabled={Boolean(runningAction)}
-                onClick={() => triggerCustomAction(svc, ca.key)}
-              >
-                <span>{ca.label}</span>
-              </button>
-            ))}
+                    {allowAutoRenew &&
+                      (svc.status === "active" ||
+                        svc.status === "stopped" ||
+                        svc.status === "frozen") && (
+                        <button
+                          type="button"
+                          className={styles.manageMenuItem}
+                          disabled={Boolean(runningAction)}
+                          onClick={() => {
+                            setOpenManageSvcId(null);
+                            void handleToggleAutoRenew(svc);
+                          }}
+                        >
+                          <RefreshCw size={14} />
+                          <span>
+                            {svc.auto_renew ? "Автопродление: ВКЛ" : "Автопродление: ВЫКЛ"}
+                          </span>
+                        </button>
+                      )}
+
+                    {customActions.map((ca) => (
+                      <button
+                        key={ca.key}
+                        type="button"
+                        className={`${styles.manageMenuItem} ${
+                          ca.variant === "danger" ? styles.manageMenuItemDanger : ""
+                        }`.trim()}
+                        disabled={Boolean(runningAction)}
+                        onClick={() => {
+                          setOpenManageSvcId(null);
+                          triggerCustomAction(svc, ca.key);
+                        }}
+                      >
+                        <span>{ca.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
