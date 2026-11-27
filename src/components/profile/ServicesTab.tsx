@@ -570,7 +570,11 @@ export const ServicesTab: React.FC = () => {
     const hasActionsBar = Boolean(viewSchema || instruction || canManage);
 
     return (
-      <div key={svc.id} className={styles.serviceCard}>
+      <div
+        key={svc.id}
+        className={styles.serviceCard}
+        style={openManageSvcId === svc.id ? { zIndex: 30 } : undefined}
+      >
         <div className={styles.cardTop}>
           <div className={styles.cardTitleWrap}>
             <span className={styles.serviceName}>{title}</span>
