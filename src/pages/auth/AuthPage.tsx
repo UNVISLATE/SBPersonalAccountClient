@@ -110,6 +110,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
   const handleModeChange = (nextId: string) => {
     const nextMode = nextId as "login" | "register";
     setMode(nextMode);
+    setPasswordValue("");
     setRequiresTotp(false);
     setTotpValue("");
   };
@@ -281,12 +282,16 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
         }
         return;
       }
-      const msg =
+      const rawMsg =
         err instanceof ApiError
           ? err.detail
           : err instanceof Error
             ? err.message
             : "Ошибка входа в систему";
+      const msg =
+        rawMsg === "invalid login or password"
+          ? "Неверный логин или пароль"
+          : rawMsg;
       toast.error(msg);
     } finally {
       setSubmitting(false);

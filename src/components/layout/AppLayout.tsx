@@ -81,9 +81,12 @@ export const AppLayout: React.FC = () => {
                   SaviorBill
                 </a>
                 {(import.meta.env.VITE_APP_VERSION || branding.version) && (
-                  <span className={styles.versionTag}>
-                    {import.meta.env.VITE_APP_VERSION || branding.version}
-                  </span>
+                  <>
+                    {" "}
+                    <span className={styles.versionTag}>
+                      {import.meta.env.VITE_APP_VERSION || branding.version}
+                    </span>
+                  </>
                 )}
               </span>
             </div>

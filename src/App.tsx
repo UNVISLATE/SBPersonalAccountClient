@@ -23,8 +23,9 @@ export const App: React.FC = () => {
       <AuthProvider>
         <RouterProvider router={router} />
         <Toaster
-          position="top-center"
+          position="bottom-right"
           theme="dark"
+          style={{ zIndex: 10000 }}
           richColors
           toastOptions={{
             style: {

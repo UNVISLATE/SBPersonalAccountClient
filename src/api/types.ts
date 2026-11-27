@@ -53,6 +53,10 @@ export interface UserService {
   created_at: string
   delivered_at?: string | null
   auto_renew?: boolean
+  allow_early_renew?: boolean
+  allow_auto_renew?: boolean
+  allow_renew_config_change?: boolean
+  allow_instant_upgrade?: boolean
   auto_renew_last_error?: string | null
   pending_order_config?: Record<string, unknown> | null
   pending_apply_at?: string | null

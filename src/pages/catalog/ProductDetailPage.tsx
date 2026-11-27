@@ -73,8 +73,13 @@ interface FlatTier extends ServiceTier {
   groupTitle?: string;
 }
 
-const getErrMsg = (err: unknown, fallback: string) =>
-  err instanceof ApiError ? err.detail : err instanceof Error ? err.message : fallback;
+const getErrMsg = (err: unknown, fallback: string) => {
+  const raw = err instanceof ApiError ? err.detail : err instanceof Error ? err.message : fallback;
+  if (raw === "promo code is invalid" || raw === "promo code not found") {
+    return "Промокод недействителен или не найден";
+  }
+  return raw;
+};
 
 function flattenTiers(rawTiers: ServiceTier[]): FlatTier[] {
   const result: FlatTier[] = [];
@@ -397,7 +402,7 @@ export const ProductDetailPage: React.FC = () => {
       custom_amount: priceType === "custom" ? effectiveCustomAmount : undefined,
       components: priceType === "configurable" ? effectiveComponents : undefined,
       form: Object.keys(formValues).length > 0 ? formValues : undefined,
-      promocode: promocode.trim().toUpperCase() || undefined,
+      promocode: discountAmount > 0 ? promocode.trim().toUpperCase() : undefined,
     };
 
     try {
@@ -418,7 +423,11 @@ export const ProductDetailPage: React.FC = () => {
           public_data?: Record<string, unknown>;
         }>("/user/services/create", orderPayload);
 
-        toast.success("Заказ успешно оплачен и выдан!");
+        toast.success(
+          res.status === "provisioning" || res.status === "pending"
+            ? "Заказ оплачен, идёт настройка услуги..."
+            : "Заказ успешно оплачен и выдан!"
+        );
         setCheckoutOpen(false);
         await refreshUser();
         await qc.invalidateQueries({ queryKey: ["user-services"] });

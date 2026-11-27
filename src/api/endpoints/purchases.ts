@@ -5,10 +5,11 @@ import type { PaymentProvider } from "@/api/types"
 export interface CreateInvoiceBody {
   amount?: number
   provider: string
-  target: "balance" | "service"
+  target: "balance" | "service" | "renew"
   currency?: string
   amount_in_payment_currency?: boolean
   service_id?: number
+  user_svc_id?: number
   custom_amount?: number
   tier_code?: string
   components?: Record<string, unknown>
