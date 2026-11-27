@@ -25,8 +25,8 @@ export const setup2fa = () =>
 export const enable2fa = (code: string) =>
   api.post<{ recovery_codes: string[] }>("/user/me/2fa/enable", { code })
 
-export const disable2fa = (password: string) =>
-  api.post<void>("/user/me/2fa/disable", { password })
+export const disable2fa = (payload: { password?: string; code?: string }) =>
+  api.post<void>("/user/me/2fa/disable", payload)
 
 export const changeNickname = (login: string) => api.patch<UserProfile>("/user/me", { login })
 

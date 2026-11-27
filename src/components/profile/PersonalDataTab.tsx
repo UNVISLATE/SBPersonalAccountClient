@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/motion";
 import { QRCode } from "@unvislate/sbui-sdk/components/qr/QRCode";
 import { toast } from "sonner";
 import {
+  KeyRound,
   User,
   Mail,
   Key,
@@ -284,13 +285,14 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
 
   const handleConfirmDisable2FA = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!disablePassword) {
-      toast.error("Введите текущий пароль");
+    const val = disablePassword.trim();
+    if (!val) {
+      toast.error("Введите код из приложения или резервный код");
       return;
     }
     try {
       setDisabling2Fa(true);
-      await disable2fa(disablePassword);
+      await disable2fa({ code: val });
       toast.success("Двухфакторная защита отключена");
       setTwoFaDisableOpen(false);
       clearModalQueryParam();
@@ -719,16 +721,17 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
           clearModalQueryParam();
         }}
         title="Отключение 2FA"
-        subtitle="Введите текущий пароль для подтверждения"
+        subtitle="Введите одноразовый код 2FA или резервный код"
         maxWidth={410}
       >
         <form onSubmit={handleConfirmDisable2FA} className={styles.modalForm}>
           <Input
-            label="Текущий пароль"
-            type="password"
+            label="Код 2FA или резервный код"
+            type="text"
             value={disablePassword}
             onChange={(e) => setDisablePassword(e.target.value)}
-            leftIcon={<Lock size={16} />}
+            leftIcon={<KeyRound size={16} />}
+            placeholder="000000 или резервный код"
             required
             autoFocus
           />
