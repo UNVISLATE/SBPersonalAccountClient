@@ -54,6 +54,13 @@ export async function claimGuest(claim_code: string, password: string): Promise<
   await verifyGuestClaim(claim_code, "", password)
 }
 
+export async function confirmOAuth2fa(
+  challenge_token: string,
+  code: string
+): Promise<void> {
+  await api.post("/callback/oauth/2fa/confirm", { challenge_token, code })
+}
+
 export async function logout(): Promise<void> {
   try {
     await api.post("/auth/logout")

@@ -7,6 +7,11 @@ import {
   setup2fa,
   enable2fa,
   disable2fa,
+  request2faEmailReset,
+  confirm2faEmailReset,
+  getGdprStatus,
+  exportGdprData,
+  deleteGdprAccount,
   changeNickname,
   changeEmail,
   changePassword,
@@ -89,6 +94,14 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
   const [twoFaDisableOpen, setTwoFaDisableOpen] = useState(false);
   const [disablePassword, setDisablePassword] = useState("");
   const [disabling2Fa, setDisabling2Fa] = useState(false);
+  const [emailResetMode, setEmailResetMode] = useState(false);
+  const [emailResetSent, setEmailResetSent] = useState(false);
+  const [emailResetCode, setEmailResetCode] = useState("");
+  const [gdprExporting, setGdprExporting] = useState(false);
+  const [gdprBypassCode, setGdprBypassCode] = useState("");
+  const [gdprDeleteOpen, setGdprDeleteOpen] = useState(false);
+  const [gdprDeleteSecret, setGdprDeleteSecret] = useState("");
+  const [gdprDeleting, setGdprDeleting] = useState(false);
 
   // Queries
   const {
@@ -120,6 +133,95 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
       }
     },
   });
+
+  const {
+    data: gdprStatus,
+    refetch: refetchGdpr,
+  } = useQuery({
+    queryKey: ["user-gdpr-status"],
+    queryFn: async () => {
+      try {
+        return await getGdprStatus();
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  const handleRequest2FAEmailReset = async () => {
+    try {
+      setDisabling2Fa(true);
+      await request2faEmailReset();
+      setEmailResetSent(true);
+      toast.success("Код для сброса 2FA отправлен на подтверждённую почту");
+    } catch (err) {
+      toast.error(getErrorMsg(err, "Сброс 2FA по почте недоступен"));
+    } finally {
+      setDisabling2Fa(false);
+    }
+  };
+
+  const handleConfirm2FAEmailReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailResetCode.trim()) return;
+    try {
+      setDisabling2Fa(true);
+      await confirm2faEmailReset(emailResetCode.trim());
+      toast.success("2FA сброшена");
+      setTwoFaDisableOpen(false);
+      setEmailResetMode(false);
+      setEmailResetSent(false);
+      setEmailResetCode("");
+      clearModalQueryParam();
+      refetch2FA();
+      onUserUpdated();
+    } catch (err) {
+      toast.error(getErrorMsg(err, "Неверный или истёкший код"));
+    } finally {
+      setDisabling2Fa(false);
+    }
+  };
+
+  const handleExportGdpr = async () => {
+    try {
+      setGdprExporting(true);
+      const data = await exportGdprData(gdprBypassCode.trim() || undefined);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `saviorbill-data-${user.id}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Архив персональных данных сформирован");
+      setGdprBypassCode("");
+      void refetchGdpr();
+    } catch (err) {
+      toast.error(getErrorMsg(err, "Не удалось выгрузить данные"));
+      void refetchGdpr();
+    } finally {
+      setGdprExporting(false);
+    }
+  };
+
+  const handleConfirmGdprDelete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setGdprDeleting(true);
+      await deleteGdprAccount(
+        twoFaStatus?.enabled
+          ? { confirm: true, totp_code: gdprDeleteSecret.trim() }
+          : { confirm: true, password: gdprDeleteSecret }
+      );
+      toast.success("Аккаунт анонимизирован и деактивирован");
+      setGdprDeleteOpen(false);
+      onLogout();
+    } catch (err) {
+      toast.error(getErrorMsg(err, "Не удалось удалить аккаунт"));
+    } finally {
+      setGdprDeleting(false);
+    }
+  };
 
   const handleSaveNickname = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -529,6 +631,72 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
         </div>
       </section>
 
+      {gdprStatus?.enabled && (
+        <section className={styles.sectionCard}>
+          <div className={styles.sectionHead}>
+            <h2 className={styles.sectionTitle}>ПРИВАТНОСТЬ И GDPR</h2>
+            <p className={styles.sectionSubtitle}>
+              Управление персональными данными и правами субъекта данных
+            </p>
+          </div>
+          <div className={styles.actionsList}>
+            {gdprStatus.export_enabled && (
+              <div className={styles.actionRow} style={{ flexWrap: "wrap", gap: "12px" }}>
+                <div className={styles.actionInfo}>
+                  <span className={styles.actionTitle}>Выгрузка персональных данных</span>
+                  <span className={styles.actionDesc}>
+                    {gdprStatus.cooldown_remaining_sec > 0
+                      ? `Задержка безопасности после смены почты/пароля: осталось ~${Math.ceil(gdprStatus.cooldown_remaining_sec / 60)} мин.`
+                      : gdprStatus.rate_limit_remaining_sec > 0
+                        ? `Повторная выгрузка будет доступна через ~${Math.ceil(gdprStatus.rate_limit_remaining_sec / 60)} мин.`
+                        : "Скачать JSON-архив профиля, истории email, заказов и платежей."}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  {gdprStatus.cooldown_remaining_sec > 0 &&
+                    gdprStatus.allow_cooldown_bypass_with_2fa &&
+                    twoFaStatus?.enabled && (
+                      <Input
+                        placeholder="Код 2FA для обхода"
+                        value={gdprBypassCode}
+                        onChange={(e) => setGdprBypassCode(e.target.value)}
+                      />
+                    )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    loading={gdprExporting}
+                    onClick={handleExportGdpr}
+                  >
+                    Скачать JSON
+                  </Button>
+                </div>
+              </div>
+            )}
+            {gdprStatus.erasure_enabled && (
+              <div className={styles.actionRow}>
+                <div className={styles.actionInfo}>
+                  <span className={styles.actionTitle}>Удаление и анонимизация аккаунта</span>
+                  <span className={styles.actionDesc}>
+                    Необратимая очистка персональных данных (email, пароль, OAuth) с сохранением финансовой истории.
+                  </span>
+                </div>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => {
+                    setGdprDeleteSecret("");
+                    setGdprDeleteOpen(true);
+                  }}
+                >
+                  Удалить аккаунт
+                </Button>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Modals via Portal */}
       <Modal
         isOpen={nicknameOpen}
@@ -718,25 +886,94 @@ export const PersonalDataTab: React.FC<PersonalDataTabProps> = ({
         isOpen={effectiveTwoFaDisableOpen}
         onClose={() => {
           setTwoFaDisableOpen(false);
+          setEmailResetMode(false);
+          setEmailResetSent(false);
+          setEmailResetCode("");
           clearModalQueryParam();
         }}
-        title="Отключение 2FA"
-        subtitle="Введите одноразовый код 2FA или резервный код"
+        title={emailResetMode ? "Сброс 2FA по почте" : "Отключение 2FA"}
+        subtitle={
+          emailResetMode
+            ? "Одноразовый код будет отправлен на подтверждённую почту"
+            : "Введите одноразовый код 2FA или резервный код"
+        }
         maxWidth={410}
       >
-        <form onSubmit={handleConfirmDisable2FA} className={styles.modalForm}>
+        {emailResetMode ? (
+          <form onSubmit={handleConfirm2FAEmailReset} className={styles.modalForm}>
+            {!emailResetSent ? (
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                loading={disabling2Fa}
+                onClick={handleRequest2FAEmailReset}
+                className={styles.fullBtn}
+              >
+                Отправить код на почту
+              </Button>
+            ) : (
+              <>
+                <Input
+                  label="Код из письма"
+                  type="text"
+                  value={emailResetCode}
+                  onChange={(e) => setEmailResetCode(e.target.value)}
+                  leftIcon={<Mail size={16} />}
+                  placeholder="6-значный код"
+                  required
+                  autoFocus
+                />
+                <Button type="submit" variant="danger" size="lg" loading={disabling2Fa} className={styles.fullBtn}>
+                  Сбросить 2FA
+                </Button>
+              </>
+            )}
+            <Button type="button" variant="ghost" size="sm" onClick={() => setEmailResetMode(false)}>
+              Назад к вводу кода 2FA
+            </Button>
+          </form>
+        ) : (
+          <form onSubmit={handleConfirmDisable2FA} className={styles.modalForm}>
+            <Input
+              label="Код 2FA или резервный код"
+              type="text"
+              value={disablePassword}
+              onChange={(e) => setDisablePassword(e.target.value)}
+              leftIcon={<KeyRound size={16} />}
+              placeholder="000000 или резервный код"
+              required
+              autoFocus
+            />
+            <Button type="submit" variant="danger" size="lg" loading={disabling2Fa} className={styles.fullBtn}>
+              Отключить защиту
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setEmailResetMode(true)}>
+              Нет доступа к приложению? Сбросить по почте
+            </Button>
+          </form>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={gdprDeleteOpen}
+        onClose={() => setGdprDeleteOpen(false)}
+        title="Удаление аккаунта (GDPR)"
+        subtitle="Это действие необратимо. Все сессии будут завершены."
+        maxWidth={420}
+      >
+        <form onSubmit={handleConfirmGdprDelete} className={styles.modalForm}>
           <Input
-            label="Код 2FA или резервный код"
-            type="text"
-            value={disablePassword}
-            onChange={(e) => setDisablePassword(e.target.value)}
-            leftIcon={<KeyRound size={16} />}
-            placeholder="000000 или резервный код"
-            required
+            label={twoFaStatus?.enabled ? "Код 2FA или резервный код" : "Текущий пароль (если задан)"}
+            type={twoFaStatus?.enabled ? "text" : "password"}
+            value={gdprDeleteSecret}
+            onChange={(e) => setGdprDeleteSecret(e.target.value)}
+            leftIcon={<Lock size={16} />}
+            required={Boolean(twoFaStatus?.enabled)}
             autoFocus
           />
-          <Button type="submit" variant="danger" size="lg" loading={disabling2Fa} className={styles.fullBtn}>
-            Отключить защиту
+          <Button type="submit" variant="danger" size="lg" loading={gdprDeleting} className={styles.fullBtn}>
+            Подтвердить удаление аккаунта
           </Button>
         </form>
       </Modal>

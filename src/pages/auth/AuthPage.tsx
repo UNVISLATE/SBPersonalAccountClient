@@ -10,6 +10,7 @@ import {
   requestGuestClaim,
   requestPasswordReset,
   confirmPasswordReset,
+  confirmOAuth2fa,
 } from "@/api/endpoints/auth";
 import { Logo } from "@/components/ui/Logo/Logo";
 import { Input } from "@/components/ui/Input/Input";
@@ -65,6 +66,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
 
   const [totpValue, setTotpValue] = useState("");
   const [requiresTotp, setRequiresTotp] = useState(false);
+  const [oauth2faToken, setOauth2faToken] = useState(() => searchParams.get("oauth_2fa_token") || "");
+  const [oauth2faCode, setOauth2faCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -243,6 +246,17 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
     try {
       setSubmitting(true);
 
+      if (oauth2faToken) {
+        if (!oauth2faCode.trim()) {
+          toast.error("Введите код 2FA или резервный код");
+          return;
+        }
+        await confirmOAuth2fa(oauth2faToken, oauth2faCode.trim());
+        toast.success("Вход выполнен!");
+        window.location.assign("/profile");
+        return;
+      }
+
       if (mode === "login") {
         await login(loginValue.trim(), passwordValue, totpValue.trim() || undefined);
         toast.success("Вход выполнен успешно!");
@@ -380,7 +394,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
             </div>
           )}
 
-          {mode !== "claim" && mode !== "reset" && tabItems.length > 1 && (
+          {!oauth2faToken && mode !== "claim" && mode !== "reset" && tabItems.length > 1 && (
             <div className={styles.tabsWrap}>
               <CapsuleTabs
                 items={tabItems}
@@ -392,6 +406,42 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
           )}
 
           <form onSubmit={handleSubmit} className={styles.form} noValidate>
+            {oauth2faToken ? (
+              <>
+                <div className={styles.loginNotice}>
+                  <Info size={16} />
+                  <div>
+                    Аккаунт защищён 2FA. Введите одноразовый или резервный код для завершения входа через OAuth.
+                  </div>
+                </div>
+                <Input
+                  label="Код 2FA или резервный код"
+                  type="text"
+                  value={oauth2faCode}
+                  onChange={(e) => setOauth2faCode(e.target.value)}
+                  leftIcon={<KeyRound size={16} />}
+                  placeholder="000000 или резервный код"
+                  required
+                  autoFocus
+                />
+                <Button type="submit" variant="gradient" size="lg" loading={submitting} className={styles.submitBtn}>
+                  Подтвердить вход
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setOauth2faToken("");
+                    setOauth2faCode("");
+                    navigate("/login", { replace: true });
+                  }}
+                >
+                  Отмена
+                </Button>
+              </>
+            ) : (
+              <>
             {/* ── Mode: Claim ── */}
             {mode === "claim" && !claimToken && (
               <Input
@@ -660,6 +710,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = "login" }) => 
                     ? "Войти в кабинет"
                     : "Создать аккаунт"}
             </Button>
+              </>
+            )}
           </form>
 
           {/* ── OAuth Fast Sign-In Buttons ── */}
