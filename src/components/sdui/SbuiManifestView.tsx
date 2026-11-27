@@ -161,6 +161,7 @@ export interface SbuiManifestViewProps {
   extractedKey?: string | null;
   instruction?: string | null;
   onOpenInstruction?: () => void;
+  onServiceAction?: (actionKey: string) => void;
 }
 
 export const SbuiManifestView: React.FC<SbuiManifestViewProps> = ({
@@ -170,6 +171,7 @@ export const SbuiManifestView: React.FC<SbuiManifestViewProps> = ({
   extractedKey,
   instruction,
   onOpenInstruction,
+  onServiceAction,
 }) => {
   const [formState, setFormState] = useState<Record<string, unknown>>({});
   const [activeDialogNode, setActiveDialogNode] = useState<{
@@ -233,6 +235,11 @@ export const SbuiManifestView: React.FC<SbuiManifestViewProps> = ({
 
     if (action === "instruction" || action === "markdown") {
       onOpenInstruction?.();
+      return;
+    }
+
+    if (action.startsWith("custom.")) {
+      onServiceAction?.(action);
       return;
     }
 

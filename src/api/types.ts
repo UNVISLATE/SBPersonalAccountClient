@@ -27,7 +27,16 @@ export interface UserProfile {
   referral_count?: number
 }
 
-export type ServiceStatus = "active" | "expired" | "suspended" | "pending"
+export type ServiceStatus = "active" | "expired" | "suspended" | "pending" | "provisioning" | "frozen" | "stopped"
+
+export interface CustomServiceAction {
+  key: string
+  label: string
+  variant?: "default" | "primary" | "danger"
+  allowed_statuses?: string[]
+  confirm_text?: string | null
+  verify?: "none" | "2fa" | "email" | "2fa_or_email"
+}
 
 export interface UserService {
   id: number
@@ -50,6 +59,7 @@ export interface UserService {
   product_key?: string | null
   product_kind?: string | null
   actions?: unknown[]
+  custom_actions?: CustomServiceAction[]
   error?: string | null
   secret_key?: string
   instruction_md?: string | null

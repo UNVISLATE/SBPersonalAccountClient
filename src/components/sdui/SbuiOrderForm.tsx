@@ -67,7 +67,19 @@ export interface MarkdownNode {
   depends_on?: OrderFieldCondition;
 }
 
-export type ExtendedSchemaNode = SchemaNode | CopyFieldNode | MarkdownNode;
+export interface ActionButtonNode {
+  type: "action_button";
+  id?: string;
+  action_key: string;
+  label?: string;
+  variant?: "default" | "primary" | "danger";
+  disabled?: boolean;
+  className?: string;
+  style?: Record<string, string | number>;
+  depends_on?: OrderFieldCondition;
+}
+
+export type ExtendedSchemaNode = SchemaNode | CopyFieldNode | MarkdownNode | ActionButtonNode;
 
 export interface OrderManifest {
   version?: string;
@@ -655,6 +667,32 @@ export const ClientSchemaNode: React.FC<{
           }
         >
           {node.label}
+        </Button>
+      );
+    }
+
+    case "action_button": {
+      const ab = node as unknown as {
+        action_key?: string;
+        label?: string;
+        variant?: string;
+        disabled?: boolean;
+      };
+      const actionKey = String(ab.action_key || "").trim();
+      if (!/^custom\.[a-z][a-z0-9_]{1,31}$/.test(actionKey)) {
+        return null;
+      }
+      return (
+        <Button
+          type="button"
+          variant={ab.variant === "primary" ? "gradient" : ab.variant === "danger" ? "danger" : "secondary"}
+          size="md"
+          disabled={Boolean(ab.disabled)}
+          className={(node as { className?: string }).className}
+          style={(node as { style?: React.CSSProperties }).style}
+          onClick={() => onAction?.(actionKey, { label: ab.label || actionKey })}
+        >
+          {ab.label || actionKey}
         </Button>
       );
     }

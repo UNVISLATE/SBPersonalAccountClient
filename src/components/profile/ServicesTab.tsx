@@ -12,7 +12,7 @@ import { api, ApiError } from "@/api/client";
 import { AnimatePresence, motion } from "motion/react";
 import { getService as getCatalogService } from "@/api/endpoints/catalog";
 import { getServices as getUserServices } from "@/api/endpoints/user";
-import type { CatalogService, UserService } from "@/api/types";
+import type { CatalogService, CustomServiceAction, UserService } from "@/api/types";
 import { useCopy } from "@/hooks/use-copy";
 import { useIsMobile } from "@/hooks/use-media-query";
 import { useInfiniteSentinel } from "@/hooks/use-infinite-sentinel";
@@ -72,6 +72,9 @@ const STATUS_META: Record<
   active: { label: "Активен", variant: "success" },
   delivered: { label: "Выдан", variant: "success" },
   pending: { label: "Ожидание", variant: "warning" },
+  provisioning: { label: "Настройка...", variant: "warning" },
+  frozen: { label: "Заморожен", variant: "danger" },
+  stopped: { label: "Остановлен", variant: "muted" },
   expired: { label: "Истёк", variant: "muted" },
   suspended: { label: "Приостановлен", variant: "danger" },
   failed: { label: "Ошибка", variant: "danger" },
@@ -364,9 +367,18 @@ export const ServicesTab: React.FC = () => {
 
   const qc = useQueryClient();
   const [runningAction, setRunningAction] = useState<string | null>(null);
+  const [pendingCustomModal, setPendingCustomModal] = useState<{
+    svc: UserService;
+    actionDef: CustomServiceAction;
+    verifyRequired?: string;
+    verifyCode: string;
+    emailSent: boolean;
+    sendingEmail: boolean;
+  } | null>(null);
 
-  // Auto-poll while target order is pending delivery/payment
-  const isTargetPending = activeViewSvc?.status === "pending";
+  // Auto-poll while target order is pending or provisioning
+  const isTargetPending =
+    activeViewSvc?.status === "pending" || activeViewSvc?.status === "provisioning";
   useEffect(() => {
     if (!isTargetPending) return;
     const interval = setInterval(() => {
@@ -380,17 +392,70 @@ export const ServicesTab: React.FC = () => {
     toast.info("Выберите период или тариф для продления услуги");
   };
 
-  const handleServiceAction = async (svcId: number, action: string) => {
+  const handleServiceAction = async (svcId: number, action: string, verifyCode?: string) => {
     try {
       setRunningAction(`${svcId}-${action}`);
-      await api.post(`/user/services/${svcId}/action`, { action });
+      await api.post(`/user/services/${svcId}/action`, {
+        action,
+        ...(verifyCode ? { verify_code: verifyCode } : {}),
+      });
       toast.success(`Действие «${action}» успешно выполнено!`);
+      setPendingCustomModal(null);
       await qc.invalidateQueries({ queryKey: ["user-services"] });
     } catch (err) {
+      if (err instanceof ApiError && err.status === 428) {
+        setPendingCustomModal((prev) =>
+          prev ? { ...prev, verifyRequired: prev.verifyRequired || "2fa" } : null
+        );
+        return;
+      }
       const msg = err instanceof ApiError ? err.detail : "Не удалось выполнить действие";
       toast.error(msg);
     } finally {
       setRunningAction(null);
+    }
+  };
+
+  const triggerCustomAction = (svc: UserService, actionKey: string) => {
+    const customList = Array.isArray(svc.custom_actions) ? svc.custom_actions : [];
+    const actionDef = customList.find((a) => a.key === actionKey);
+    if (!actionDef) {
+      toast.error("Это действие недоступно для данной услуги");
+      return;
+    }
+    const allowed = actionDef.allowed_statuses || ["active"];
+    if (!allowed.includes(svc.status)) {
+      toast.error(`Действие недоступно в статусе «${svc.status}»`);
+      return;
+    }
+    const needsVerify = Boolean(actionDef.verify && actionDef.verify !== "none");
+    if (actionDef.confirm_text || needsVerify) {
+      setPendingCustomModal({
+        svc,
+        actionDef,
+        verifyRequired: needsVerify ? actionDef.verify : undefined,
+        verifyCode: "",
+        emailSent: false,
+        sendingEmail: false,
+      });
+      return;
+    }
+    void handleServiceAction(svc.id, actionDef.key);
+  };
+
+  const handleSendActionChallenge = async () => {
+    if (!pendingCustomModal) return;
+    try {
+      setPendingCustomModal((prev) => (prev ? { ...prev, sendingEmail: true } : null));
+      await api.post(`/user/services/${pendingCustomModal.svc.id}/action/challenge`, {
+        action: pendingCustomModal.actionDef.key,
+      });
+      toast.success("Код подтверждения отправлен на ваш email");
+      setPendingCustomModal((prev) => (prev ? { ...prev, emailSent: true, sendingEmail: false } : null));
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.detail : "Не удалось отправить код";
+      toast.error(msg);
+      setPendingCustomModal((prev) => (prev ? { ...prev, sendingEmail: false } : null));
     }
   };
 
@@ -450,7 +515,10 @@ export const ServicesTab: React.FC = () => {
     const canRenew = !isKeyDelivery && svc.status === "active" && (actionsList.includes("renew") || Boolean(svc.expires_at));
     const canFreeze = !isKeyDelivery && svc.status === "active" && actionsList.includes("freeze") && Boolean(svc.expires_at);
     const canUnfreeze = !isKeyDelivery && svc.status === "frozen" && (actionsList.includes("unfreeze") || actionsList.includes("freeze"));
-    const canManage = canRenew || canFreeze || canUnfreeze;
+    const customActions = (Array.isArray(svc.custom_actions) ? svc.custom_actions : []).filter(
+      (ca) => !ca.allowed_statuses || ca.allowed_statuses.includes(svc.status)
+    );
+    const canManage = canRenew || canFreeze || canUnfreeze || customActions.length > 0;
     const hasActionsBar = Boolean(viewSchema || instruction || canManage);
 
     return (
@@ -579,6 +647,23 @@ export const ServicesTab: React.FC = () => {
                 <span>Разморозить</span>
               </button>
             )}
+
+            {customActions.map((ca) => (
+              <button
+                key={ca.key}
+                type="button"
+                className={styles.actionPillBtn}
+                style={
+                  ca.variant === "danger"
+                    ? { borderColor: "rgba(239, 68, 68, 0.4)", color: "#f87171" }
+                    : undefined
+                }
+                disabled={Boolean(runningAction)}
+                onClick={() => triggerCustomAction(svc, ca.key)}
+              >
+                <span>{ca.label}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -724,6 +809,11 @@ export const ServicesTab: React.FC = () => {
               handleCloseServiceOrder();
               setTimeout(() => setActiveInstrSvc(target), 160);
             }}
+            onServiceAction={(actionKey) => {
+              if (activeViewSvc) {
+                triggerCustomAction(activeViewSvc, actionKey);
+              }
+            }}
           />
         ) : activeViewSvc ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -860,6 +950,91 @@ export const ServicesTab: React.FC = () => {
         {activeInstrContent && (
           <div className={styles.instrModalBody}>
             <MarkdownContent content={activeInstrContent} />
+          </div>
+        )}
+      </Modal>
+
+      {/* Custom Action Confirmation & Step-Up Verification Modal */}
+      <Modal
+        isOpen={Boolean(pendingCustomModal)}
+        onClose={() => setPendingCustomModal(null)}
+        title={pendingCustomModal?.actionDef.label || "Подтверждение действия"}
+        subtitle={pendingCustomModal ? `Заказ #${pendingCustomModal.svc.id}` : undefined}
+        maxWidth={440}
+      >
+        {pendingCustomModal && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {pendingCustomModal.actionDef.confirm_text && (
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, opacity: 0.9 }}>
+                {pendingCustomModal.actionDef.confirm_text}
+              </p>
+            )}
+
+            {pendingCustomModal.verifyRequired && pendingCustomModal.verifyRequired !== "none" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ fontSize: 13, opacity: 0.8 }}>
+                  {pendingCustomModal.verifyRequired === "2fa"
+                    ? "Введите 6-значный код из приложения-аутентификатора (2FA):"
+                    : pendingCustomModal.verifyRequired === "email"
+                    ? "Запросите одноразовый код на вашу почту и введите его ниже:"
+                    : "Введите код 2FA или запросите одноразовый код на email:"}
+                </div>
+                {(pendingCustomModal.verifyRequired === "email" ||
+                  pendingCustomModal.verifyRequired === "2fa_or_email") && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    disabled={pendingCustomModal.sendingEmail}
+                    onClick={handleSendActionChallenge}
+                  >
+                    {pendingCustomModal.sendingEmail
+                      ? "Отправка..."
+                      : pendingCustomModal.emailSent
+                      ? "Отправить код повторно"
+                      : "Отправить код на email"}
+                  </Button>
+                )}
+                <Input
+                  placeholder="Код подтверждения (6 цифр)"
+                  value={pendingCustomModal.verifyCode}
+                  onChange={(e) =>
+                    setPendingCustomModal((prev) =>
+                      prev ? { ...prev, verifyCode: e.target.value } : null
+                    )
+                  }
+                />
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4 }}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setPendingCustomModal(null)}
+              >
+                Отмена
+              </Button>
+              <Button
+                type="button"
+                variant={pendingCustomModal.actionDef.variant === "danger" ? "danger" : "gradient"}
+                disabled={
+                  Boolean(runningAction) ||
+                  (Boolean(pendingCustomModal.verifyRequired) &&
+                    pendingCustomModal.verifyRequired !== "none" &&
+                    !pendingCustomModal.verifyCode.trim())
+                }
+                onClick={() =>
+                  void handleServiceAction(
+                    pendingCustomModal.svc.id,
+                    pendingCustomModal.actionDef.key,
+                    pendingCustomModal.verifyCode.trim() || undefined
+                  )
+                }
+              >
+                {runningAction ? "Выполнение..." : "Подтвердить"}
+              </Button>
+            </div>
           </div>
         )}
       </Modal>
