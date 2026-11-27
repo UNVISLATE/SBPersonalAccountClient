@@ -1154,7 +1154,7 @@ export const ServicesTab: React.FC = () => {
                       variant="gradient"
                       onClick={() => {
                         setPendingCustomModal(null);
-                        navigate("/profile/security");
+                        navigate("/profile?modal=2fa");
                       }}
                     >
                       Настроить 2FA
